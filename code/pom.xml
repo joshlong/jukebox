@@ -80,33 +80,7 @@
                 <artifactId>spring-integration-core</artifactId>
                 <version>${spring.integration.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.springmodules</groupId>
-                <artifactId>spring-modules-jbpm31</artifactId>
-                <version>0.8a</version>
-                <exclusions>
-
-
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-dao</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-support</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>jboss</groupId>
-                        <artifactId>jbpm</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>ehcache</artifactId>
-                        <groupId>ehcache</groupId>
-                    </exclusion>
-
-                </exclusions>
-            </dependency>
+ 
             <dependency>
                 <groupId>org.codehaus.btm</groupId>
                 <artifactId>btm</artifactId>
@@ -139,13 +113,7 @@
                 <artifactId>log4j</artifactId>
                 <version>1.2.14</version>
             </dependency>
-            <!-- <dependency>
-                <groupId>antlr</groupId>
-                <artifactId>antlr</artifactId>
-                <version>2.7.7</version>
-            </dependency>-->
-
-            <!-- web jars -->
+           
             <dependency>
                 <version>3.6</version>
                 <groupId>org.apache.xbean</groupId>
@@ -176,19 +144,9 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+ 
 
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>jstl</artifactId>
-                <version>1.1.2</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.springframework.flex</groupId>
-                <artifactId>spring-flex</artifactId>
-                <version>1.0.1.RELEASE</version>
-            </dependency>
+       
             <dependency>
                 <groupId>antlr</groupId>
                 <artifactId>antlr</artifactId>
@@ -224,11 +182,7 @@
                 <artifactId>velocity-tools-view</artifactId>
                 <version>1.3</version>
             </dependency>
-            <dependency>
-                <groupId>javax.mail</groupId>
-                <version>1.4</version>
-                <artifactId>mail</artifactId>
-            </dependency>
+        
             <dependency>
                 <groupId>cglib</groupId>
                 <artifactId>cglib-nodep</artifactId>
@@ -249,11 +203,7 @@
                 <artifactId>spring-webmvc</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-asm</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+          
             <dependency>
                 <version>${spring.version}</version>
                 <groupId>org.springframework</groupId>
@@ -270,36 +220,20 @@
                 <version>${spring.security.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-web</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+          
             <dependency>
                 <version>${spring.version}</version>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context-support</artifactId>
             </dependency>
-            <dependency>
-                <version>${spring.version}</version>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-beans</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+          
+            
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jms</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+          
 
             <dependency>
                 <version>${spring.version}</version>
@@ -313,14 +247,7 @@
             </dependency>
 
 
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-instrument</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
-
-            <!--end of web jars -->
+           
 
 
             <!-- SPRING -->
@@ -330,11 +257,7 @@
                 <version>1.6.5</version>
 
             </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+         
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-web</artifactId>
@@ -361,11 +284,7 @@
                 <artifactId>spring-tx</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <version>${spring.version}</version>
-                <artifactId>spring-test</artifactId>
-            </dependency>
+        
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-instrument</artifactId>
@@ -381,32 +300,15 @@
                 <artifactId>spring-context</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
+          
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-jms</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            <dependency>
-                <version>${spring.version}</version>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-oxm</artifactId>
-            </dependency>
-            <dependency>
-                <version>${spring.version}</version>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-orm</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-context-support</artifactId>
-                <version>${spring.version}</version>
-            </dependency>
-
+        
+        
+          
 
             <!-- SPRING -->
             <dependency>
@@ -431,7 +333,7 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
                 <version>1.5.3</version>
-                <!--   <scope>runtime</scope>-->
+ 
             </dependency>
             <dependency>
                 <groupId>com.atomikos</groupId>
@@ -459,12 +361,7 @@
                 <version>1.1_01</version>
             </dependency>
 
-
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.14</version>
-            </dependency>
+ 
 
             <dependency>
                 <groupId>xerces</groupId>
@@ -488,13 +385,7 @@
                 <groupId>org.jbpm</groupId>
             </dependency>
 
-            <dependency>
-                <groupId>javax.persistence</groupId>
-                <artifactId>persistence-api</artifactId>
-                <version>1.0</version>
-            </dependency>
-
-
+     
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
@@ -532,27 +423,9 @@
                 <artifactId>commons-lang</artifactId>
                 <version>2.2</version>
             </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.mail</groupId>
-                <artifactId>mail</artifactId>
-                <version>1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-httpclient</groupId>
-                <artifactId>commons-httpclient</artifactId>
-
-                <version>3.0.1</version>
-            </dependency>
+         
+      
+      
             <dependency>
                 <groupId>jdom</groupId>
                 <artifactId>jdom</artifactId>
@@ -564,17 +437,8 @@
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.8.2</version>
             </dependency>
-            <dependency>
-                <groupId>c3p0</groupId>
-                <artifactId>c3p0</artifactId>
-                <version>0.9.0.4</version>
-            </dependency>
-
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.0</version>
-            </dependency>
+    
+    
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
@@ -603,13 +467,7 @@
                 <artifactId>persistence-api</artifactId>
                 <version>1.0</version>
             </dependency>
-
-            <dependency>
-                <groupId>commons-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>3.2</version>
-            </dependency>
-
+ 
 
             <dependency>
                 <groupId>javax.transaction</groupId>
@@ -622,21 +480,8 @@
                 <artifactId>commons-digester</artifactId>
                 <version>1.7</version>
             </dependency>
-            <!--<dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId></artifactId>
-                <version></version>
-            </dependency>-->
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.1</version>
-            </dependency>
+  
+    
             <dependency>
                 <groupId>javax.mail</groupId>
                 <artifactId>mail</artifactId>
@@ -649,34 +494,8 @@
             </dependency>
  
 
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>2.0</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>1.3</version>
-            </dependency>
-             
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.5.3</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-httpclient</groupId>
-                <artifactId>commons-httpclient</artifactId>
-                <version>3.0.1</version>
-
-            </dependency>
-            <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>1.1</version>
-
-            </dependency>
+    
+         
             <dependency>
                 <groupId>com.ocpsoft</groupId>
                 <artifactId>ocpsoft-pretty-faces</artifactId>
@@ -687,21 +506,13 @@
                 <artifactId>dwr</artifactId>
                 <version>2.0.3</version>
             </dependency>
-            <dependency>
-                <groupId>taglibs</groupId>
-                <artifactId>standard</artifactId>
-                <version>1.1.2</version>
-            </dependency>
+           
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>jstl</artifactId>
                 <version>1.2</version>
             </dependency>
-            <dependency>
-                <groupId>javax.annotation</groupId>
-                <artifactId>jsr250-api</artifactId>
-                <version>1.0</version>
-            </dependency>
+           
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
@@ -852,13 +663,7 @@
     </dependencyManagement>
     <dependencies>
 
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-
-            <artifactId>spring-test</artifactId>
-        </dependency>
-
+ 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-asm</artifactId>
@@ -879,11 +684,7 @@
             <artifactId>spring-web</artifactId>
 
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-
-            <artifactId>spring-test</artifactId>
-        </dependency>
+   
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-instrument</artifactId>
@@ -929,11 +730,7 @@
 
         </dependency>
 
-
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
+ 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -947,11 +744,7 @@
             <artifactId>junit</artifactId>
 
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-        </dependency>
+ 
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -960,11 +753,7 @@
             <groupId>rome</groupId>
             <artifactId>rome</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
+ 
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
