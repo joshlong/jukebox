@@ -11,6 +11,8 @@
         xsi:schemaLocation="http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd "> <!-- this information has proven invaluable: http://ourcraft.wordpress.com/tag/bitronix/ -->
 
 
+    <import resource="datasource-context.xml" />
+
     <aop:aspectj-autoproxy/>
     <context:annotation-config/>
 
@@ -24,7 +26,9 @@
     <amq:topic id="bpmsPing" physicalName="qr.bpms.pings"/>
 
     <aop:config>
-        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.quietriot..impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.joshlong.jukebox2..impl.*.*(..))"/>
+    </aop:config>
+
 
     <bean id="workflowService" parent="baseService" class="com.joshlong.jukebox2.services.impl.WorkflowServiceImpl" p:bpmsStartedPingDestination-ref="bpmsPing"/>
 
@@ -32,12 +36,9 @@
         <property name="webMediaFullUrl" value="/managedFiles"/>
     </bean>
 
+    <bean class="com.joshlong.jukebox2.services.impl.util.ServiceUtils"/>
+
     <bean id="baseService" abstract="true" lazy-init="true">
-        <property name="jdbcTemplate" ref="jdbcTemplate"/>
-        <property name="jbpmConfiguration" ref="jbpmConfiguration"/>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="sessionFactory" ref="hibernateSessionFactory"/>
-        <property name="jbpmTemplate" ref="jbpmTemplate"/>
     </bean>
 
     <tx:advice id="txAdvice" transaction-manager="jtaTransactionManager">

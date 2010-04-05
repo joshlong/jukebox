@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:amq="http://activemq.apache.org/schema/core"
+        xsi:schemaLocation="http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd "> <!-- this information has proven invaluable: http://ourcraft.wordpress.com/tag/bitronix/ -->
+
+
+    <aop:aspectj-autoproxy/>
+    <context:annotation-config/>
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:service-context.properties"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <amq:topic id="bpmsPing" physicalName="qr.bpms.pings"/>
+
+
+    <bean id="jmsConnectionFactory"
+          class="bitronix.tm.resource.jms.PoolingConnectionFactory"
+          init-method="init"
+          destroy-method="close"
+          p:className="org.apache.activemq.ActiveMQXAConnectionFactory"
+          p:uniqueName="xamq"
+          p:maxPoolSize="3"
+            >
+        <property name="driverProperties">
+            <props>
+                <prop key="brokerURL">${bpm.jms.url}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate"
+          p:connectionFactory-ref="jmsConnectionFactory" p:sessionTransacted="true"/>
+
+    <bean id="dataSource"
+          class="bitronix.tm.resource.jdbc.PoolingDataSource"
+          init-method="init"
+          destroy-method="close"
+          p:className="${dataSource.driverClassName}"
+          p:uniqueName="xasql"
+          p:maxPoolSize="5"
+          p:allowLocalTransactions="true"
+            >
+        <property name="driverProperties">
+            <props>
+                <prop key="user">${dataSource.username}</prop>
+                <prop key="password">${dataSource.password}</prop>
+                <prop key="databaseName">${dataSource.databaseName}</prop>
+                <prop key="serverName">${dataSource.serverName}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="bitronixTransactionManager" factory-method="getTransactionManager"
+          class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown"/>
+
+    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"
+          p:transactionManager-ref="bitronixTransactionManager" p:userTransaction-ref="bitronixTransactionManager"/>
+
+
+    <bean id="btmConfig" factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices" p:serverId="spring-btm-sender" />
+
+</beans>
