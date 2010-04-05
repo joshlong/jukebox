@@ -59,7 +59,10 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>1</version>
-            </dependency>
+            </dependency>    <dependency>
+            <artifactId>args4j</artifactId><version>2.0.10</version>
+            <groupId>args4j</groupId>
+        </dependency>
             <dependency>
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
