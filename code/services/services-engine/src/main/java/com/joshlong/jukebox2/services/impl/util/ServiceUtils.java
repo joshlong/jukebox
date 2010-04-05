@@ -2,14 +2,12 @@ package com.joshlong.jukebox2.services.impl.util;
 
 import org.apache.commons.codec.language.DoubleMetaphone;
 import org.apache.commons.lang.StringUtils;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
-
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,11 +16,12 @@ import java.util.List;
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
+@Component
 public class ServiceUtils implements InitializingBean {
     private HibernateTemplate hibernateTemplate;
 
     @Required
-    public void setHibernateTemplate(final HibernateTemplate hibernateTemplate) {
+    public ServiceUtils( HibernateTemplate hibernateTemplate){
         this.hibernateTemplate = hibernateTemplate;
     }
 
@@ -31,11 +30,11 @@ public class ServiceUtils implements InitializingBean {
         hibernateTemplate.setQueryCacheRegion("org.hibernate.cache.StandardQueryCache");
     }
 
-    protected <T> T get(Class<T> t, Serializable s) {
+    public <T> T get(Class<T> t, Serializable s) {
         return (T) hibernateTemplate.get(t, s);
     }
 
-    protected String generateBookmarkableFriendlyUrl(String urlToNormalizeForSeoPurposes) {
+    public  String generateBookmarkableFriendlyUrl(String urlToNormalizeForSeoPurposes) {
         String urlLowerCasedAndTrimmed = StringUtils.defaultString(urlToNormalizeForSeoPurposes).toLowerCase().trim();
         StringBuilder arr = new StringBuilder();
 
@@ -82,7 +81,7 @@ public class ServiceUtils implements InitializingBean {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T firstOrNull(Collection c) {
+    public  <T> T firstOrNull(Collection c) {
         if ((c == null) || (c.size() == 0)) {
             return null;
         }
