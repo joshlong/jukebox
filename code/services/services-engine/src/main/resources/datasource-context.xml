@@ -20,9 +20,15 @@
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
-    <amq:topic id="bpmsPing" physicalName="qr.bpms.pings"/>
+    <amq:topic id="bpmsPin" physicalName="qr.bpms.pings"/>
 
 
+
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
     <bean id="jmsConnectionFactory"
           class="bitronix.tm.resource.jms.PoolingConnectionFactory"
           init-method="init"

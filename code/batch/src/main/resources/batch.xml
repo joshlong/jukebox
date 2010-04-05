@@ -11,9 +11,8 @@
 		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
 
-    <beans:import resource="utils.xml"/>
+    <beans:import resource="datasource-context.xml"/>
     <beans:import resource="service-client-context.xml"/>
-    <beans:import resource="dataSource-context.xml"/>
 
     <!-- infrastructure
     -->
@@ -26,7 +25,7 @@
     </beans:bean>
 
     <beans:bean id="jobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean"
-                p:dataSource-ref="dataSource" p:transactionManager-ref="transactionManager"  />
+                p:dataSource-ref="dataSource" p:transactionManager-ref="jtaTransactionManager"  />
 
     <beans:bean id="jobRegistry" class="org.springframework.batch.core.configuration.support.MapJobRegistry"/>
 

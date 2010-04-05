@@ -16,12 +16,11 @@ import java.util.List;
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
-@Component
 public class ServiceUtils implements InitializingBean {
     private HibernateTemplate hibernateTemplate;
 
-    @Required
-    public ServiceUtils( HibernateTemplate hibernateTemplate){
+    @Required 
+    public void setHibernateTemplate(final HibernateTemplate hibernateTemplate) {
         this.hibernateTemplate = hibernateTemplate;
     }
 
