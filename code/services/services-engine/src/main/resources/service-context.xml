@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+        xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:amq="http://activemq.apache.org/schema/core"
+        xsi:schemaLocation="http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd "> <!-- this information has proven invaluable: http://ourcraft.wordpress.com/tag/bitronix/ -->
+
+
+    <aop:aspectj-autoproxy/>
+    <context:annotation-config/>
+
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:service-context.properties"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <amq:topic id="bpmsPing" physicalName="qr.bpms.pings"/>
+
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.quietriot..impl.*.*(..))"/>
+
+    <bean id="workflowService" parent="baseService" class="com.joshlong.jukebox2.services.impl.WorkflowServiceImpl" p:bpmsStartedPingDestination-ref="bpmsPing"/>
+
+    <bean id="managedFileService" parent="baseService" class="com.joshlong.jukebox2.services.impl.ManagedFileServiceImpl">
+        <property name="webMediaFullUrl" value="/managedFiles"/>
+    </bean>
+
+    <bean id="baseService" abstract="true" lazy-init="true">
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="jbpmConfiguration" ref="jbpmConfiguration"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="sessionFactory" ref="hibernateSessionFactory"/>
+        <property name="jbpmTemplate" ref="jbpmTemplate"/>
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="jtaTransactionManager">
+        <tx:attributes>
+            <tx:method propagation="REQUIRED" name="*" rollback-for="BlogException,WorkflowException"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="cacheStatisticsLogger" class="com.joshlong.jukebox2.services.impl.util.caching.CacheStatisticsLoggerAdvice">
+        <property name="sessionFactory" ref="hibernateSessionFactory"/>
+        <property name="enabled" value="false"/>
+    </bean>
+
+
+    <bean id="jmsConnectionFactory"
+          class="bitronix.tm.resource.jms.PoolingConnectionFactory"
+          init-method="init"
+          destroy-method="close"
+          p:className="org.apache.activemq.ActiveMQXAConnectionFactory"
+          p:uniqueName="xamq"
+          p:maxPoolSize="3"
+            >
+        <property name="driverProperties">
+            <props>
+                <prop key="brokerURL">${bpm.jms.url}</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate"
+          p:connectionFactory-ref="jmsConnectionFactory" p:sessionTransacted="true"/>
+
+    <bean id="dataSource"
+          class="bitronix.tm.resource.jdbc.PoolingDataSource"
+          init-method="init"
+          destroy-method="close"
+          p:className="${dataSource.driverClassName}"
+          p:uniqueName="xasql"
+          p:maxPoolSize="5"
+          p:allowLocalTransactions="true"
+            >
+        <property name="driverProperties">
+            <props>
+                <prop key="user">${dataSource.username}</prop>
+                <prop key="password">${dataSource.password}</prop>
+                <prop key="databaseName">${dataSource.databaseName}</prop>
+                <prop key="serverName">${dataSource.serverName}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="bitronixTransactionManager" factory-method="getTransactionManager"
+          class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown"/>
+
+    <bean id="jtaTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"
+          p:transactionManager-ref="bitronixTransactionManager" p:userTransaction-ref="bitronixTransactionManager"/>
+
+
+    <bean id="btmConfig"
+          factory-method="getConfiguration"
+          class="bitronix.tm.TransactionManagerServices"
+          p:serverId="spring-btm-sender"
+            />
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="hibernateSessionFactory" depends-on="dataSource"
+          class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <property name="mappingLocations" value="classpath*:/org/jbpm/**/*.hbm.xml"/>
+        <property name="entityInterceptor">
+            <bean class="com.joshlong.jukebox2.services.impl.hibernate.ProcessFieldInterceptors"/>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.cache.provider_class">net.sf.ehcache.hibernate.EhCacheProvider</prop>
+                <prop key="hibernate.cache.use_structured_entries">true</prop>
+                <prop key="hibernate.cache.use_query_cache">true</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.default_batch_fetch_size">30</prop>
+                <prop key="hibernate.jdbc.fetch_size">20</prop>
+                <prop key="org.hibernate.cache">info</prop>
+                <prop key="org.hibernate.transaction">info</prop>
+                <prop key="hibernate.jdbc.batch_size">20</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.use_sql_comments">true</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">ehcache.xml</prop>
+                <prop key="hibernate.dialect">${dataSource.dialect}</prop>
+                <prop key="hibernate.max_fetch_depth">3</prop>
+                <prop key="hibernate.default_batch_fetch_size">30</prop>
+                <prop key="hibernate.jdbc.batch_versioned_data">true</prop>
+                <prop key="hibernate.generate_statistics">true</prop>
+                <prop key="hibernate.connection.autocommit">true</prop>
+                <prop key="hibernate.connection.isolation">3</prop>
+                <prop key="transaction.factory_class">org.hibernate.transaction.JTATransactionFactory</prop>
+                <prop key="current_session_context_class">jta</prop>
+                <prop key="hibernate.connection.release_mode">after_statement</prop>
+            </props>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="annotatedClasses">
+
+            <list>
+                <value>com.quietriot.model.Photo</value>
+
+            </list>
+        </property>
+        <property name="schemaUpdate" value="true"/>
+    </bean>
+    <bean id="jbpmConfiguration" depends-on="hibernateSessionFactory"
+          class="org.springmodules.workflow.jbpm31.LocalJbpmConfigurationFactoryBean">
+        <property name="sessionFactory" ref="hibernateSessionFactory"/>
+        <property name="createSchema" value="false"/>
+
+        <property name="configuration" value="classpath:org/jbpm/default.jbpm.cfg.xml"/>
+        <property name="processDefinitionsResources">
+            <list>
+                <value>classpath:/workflow/processes/authorize-promoter-payment-profile.xml</value>
+                <value>classpath:/workflow/processes/verify-customer-email.xml</value>
+                <value>classpath:/workflow/processes/verify-siteAdmin-email.xml</value>
+                <value>classpath:/workflow/processes/verify-promoter-email.xml</value>
+                <value>classpath:/workflow/processes/bundle-image-processing.xml</value>
+                <value>classpath:/workflow/processes/bundle-images-processing.xml</value>
+            </list>
+        </property>
+    </bean>
+    <bean id="jbpmTemplate" class="org.springmodules.workflow.jbpm31.JbpmTemplate">
+        <constructor-arg index="0" ref="jbpmConfiguration"/>
+    </bean>
+</beans>

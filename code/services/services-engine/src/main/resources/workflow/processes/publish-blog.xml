@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition name="publish-blog">
+
+    <start-state name="start">
+        <transition to="create-blog"/>
+    </start-state>
+
+    <task-node name="create-blog">
+        <task name="create-blog-task">
+            <assignment actor-id="create-blog-agent"/>
+        </task>
+        <transition to="import-managed-uploads"/>
+    </task-node>
+    <!---->
+    <node name="import-managed-uploads">
+        <action class="com.joshlong.jukebox2.services.workflow.util.IterationForkHandler" config-type="bean">
+            <listVariable>managedUploadIdList</listVariable>
+            <as>managedUploadId</as>
+            <onEmptyListTransition>empty-list</onEmptyListTransition>
+        </action>
+        <transition name="import-managed-upload" to="import-managed-upload"/>
+        <transition name="empty-list" to="approve-blog"/>
+    </node>
+
+    <task-node name="import-managed-upload">
+        <variable name="managedUploadIdList" access="read" mapped-name="managedUploadIdList"/>
+        <task name="import-managed-upload-task">
+            <assignment actor-id="import-managed-upload-agent"/>
+        </task>
+        <transition name="iterationTransition" to="wait-for-imports"/>
+
+    </task-node>
+
+
+    <join name="wait-for-imports">
+        <transition to="approve-blog"/>
+    </join>
+
+    <task-node name="approve-blog">
+        <task name="approve-blog-task">
+            <assignment actor-id="approve-blog-agent"/>
+        </task>
+        <transition to="notify-blog-aggregators"/>
+    </task-node>
+
+
+    <task-node name="notify-blog-aggregators">
+        <task name="notify-blog-aggregators-task">
+            <assignment actor-id="notify-blog-aggregators-agent"/>
+        </task>
+        <transition to="end"/>
+    </task-node>
+
+
+    <end-state name="end"/>
+
+</process-definition>

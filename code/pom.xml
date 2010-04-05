@@ -23,6 +23,8 @@
         <jms.version>1.1</jms.version>
     </properties>
     <modules>
+	<module>services</module>
+	<module>batch</module>
   <!--       <module>ftp-server</module>
         <module>utils</module>
 
@@ -48,6 +50,11 @@
 
     <dependencyManagement>
         <dependencies>
+               <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+                   <version>2.0.4.RELEASE</version>
+        </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>

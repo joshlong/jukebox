@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+        <event type="save-update">
+            <listener class="com.joshlong.jukebox2.services.impl.hibernate.ProcessFieldInterceptors"/>
+            <listener class="org.hibernate.event.def.DefaultSaveOrUpdateEventListener"/>
+        </event>
+        <!--
+
+                <event type="save-update">
+                    <listener class="com.joshlong.blawgmpl.util.PersistenceLoggingInterceptor"/>
+                    <listener class="org.hibernate.event.def.DefaultSaveOrUpdateEventListener"/>
+                </event>
+        -->
+
+
+    </session-factory>
+</hibernate-configuration>
