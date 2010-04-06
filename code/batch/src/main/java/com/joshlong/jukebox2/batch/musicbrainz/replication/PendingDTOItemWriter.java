@@ -13,6 +13,8 @@ import java.util.List;
 
 
 /**
+ * TODO make this obsolete 
+ *
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
 public class PendingDTOItemWriter implements ItemWriter<PendingDTO> {

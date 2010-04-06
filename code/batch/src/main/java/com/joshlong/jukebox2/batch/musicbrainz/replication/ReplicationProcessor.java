@@ -33,6 +33,7 @@ public class ReplicationProcessor implements InitializingBean {
         Map<String, JobParameter> parameterMap   = new HashMap<String, JobParameter>() ;
         parameterMap.put( "bundleName", new JobParameter(bundleKey));
         parameterMap.put( "pendingFile" ,  new JobParameter(pendingFile.getAbsolutePath() ));
+        parameterMap.put("now",new JobParameter(System.currentTimeMillis()));
         JobExecution jobExecution = this.jobLauncher.run(  loadPendingJob, new JobParameters(parameterMap));
     }
 

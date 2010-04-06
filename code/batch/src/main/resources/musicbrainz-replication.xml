@@ -39,13 +39,12 @@
     <job job-repository="jobRepository" id="loadReplicationDataJob">
         <step id="pending">
             <tasklet>
-                <chunk reader="pendingReader" writer="pendingDTOItemWriter" commit-interval="100"/>
+                <chunk reader="pendingReader" writer="pendingWriter" commit-interval="100"/>
             </tasklet>
         </step>
     </job>
 
-    <beans:bean id="pendingDTOItemWriter" class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingDTOItemWriter" p:jdbcTemplate-ref="musicbrainzJdbcTemplate"/>
-<!--
+    <!--<beans:bean id="pendingDTOItemWriter" class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingDTOItemWriter" p:jdbcTemplate-ref="musicbrainzJdbcTemplate"/>-->
 
     <beans:bean id="pendingWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" scope="step"
                 p:dataSource-ref="musicbrainzDataSource"  >
@@ -54,9 +53,9 @@
             <beans:bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
         </beans:property>
         <beans:property name="sql"
-                        value="INSERT INTO &quot;Pending&quot;(SeqId,TableName,Op,XID) VALUES(  :SeqId, :TableName, :Op, :XID )"/>
+                        value="INSERT INTO &quot;pending&quot;(seq_id,table_name,op,xid) VALUES(  :seqId, :tableName, :op, :XID )"/>
     </beans:bean>
--->
+
 
 
     <beans:bean id="pendingReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step" p:resource="file://#{jobParameters['pendingFile']}">
