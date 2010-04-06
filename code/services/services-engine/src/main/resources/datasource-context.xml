@@ -99,6 +99,8 @@
           p:userTransaction-ref="bitronixTransactionManager"/>
 
 
-    <bean id="btmConfig" destroy-method="shutdown" factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices" p:serverId="spring-btm-sender" />
+    <bean id="btmConfig" destroy-method="shutdown"
+          factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices" p:serverId="spring-btm-sender"
+            />
 
 </beans>
