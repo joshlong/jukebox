@@ -1,7 +1,6 @@
 package com.joshlong.jukebox2.batch.musicbrainz.replication;
 
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -15,6 +14,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+
 /**
  * Essentially, this class will handle: - manipulating and loading the contents of a directory - processing the contents
  * of that directory
@@ -24,17 +24,21 @@ import java.util.Map;
 public class ReplicationProcessor implements InitializingBean {
     private ReplicationUtils replicationUtils;
     private JdbcTemplate jdbcTemplate;
-    private Job loadPendingJob; 
-    private JobLauncher jobLauncher ;
- 
-    public void processReplicationBundle(String bundleKey) throws Throwable {
+    private Job loadPendingJob;
+    private JobLauncher jobLauncher;
+
+    public void processReplicationBundle(String bundleKey)
+        throws Throwable {
         File pendingFile = this.replicationUtils.resolvePending(bundleKey);
-        System.out.println( "Reading pending file: "+ pendingFile.getAbsolutePath() ) ;
-        Map<String, JobParameter> parameterMap   = new HashMap<String, JobParameter>() ;
-        parameterMap.put( "bundleName", new JobParameter(bundleKey));
-        parameterMap.put( "pendingFile" ,  new JobParameter(pendingFile.getAbsolutePath() ));
-        parameterMap.put("now",new JobParameter(System.currentTimeMillis()));
-        JobExecution jobExecution = this.jobLauncher.run(  loadPendingJob, new JobParameters(parameterMap));
+        System.out.println("Reading pending file: " + pendingFile.getAbsolutePath());
+
+        Map<String, JobParameter> parameterMap = new HashMap<String, JobParameter>();
+        parameterMap.put("bundleName", new JobParameter(bundleKey));
+        parameterMap.put("pendingFile", new JobParameter(pendingFile.getAbsolutePath()));
+        parameterMap.put("now", new JobParameter(System.currentTimeMillis()));
+
+        this.jobLauncher.run(loadPendingJob, new JobParameters(parameterMap));
+        
     }
 
     public void afterPropertiesSet() throws Exception {
@@ -66,4 +70,3 @@ public class ReplicationProcessor implements InitializingBean {
         this.jdbcTemplate = jdbcTemplate;
     }
 }
-

@@ -35,6 +35,7 @@ public class ReplicationContext {
         Reader fileReader = new FileReader(f);
         String contentsOfFile = IOUtils.toString(fileReader);
         IOUtils.closeQuietly(fileReader);
+
         return contentsOfFile;
     }
 

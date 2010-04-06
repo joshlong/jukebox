@@ -4,25 +4,17 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
 public class PendingDTO {
-    private int  seqId;
+    private int seqId;
     private int XID;
     private String tableName;
     private String op;
 
-    public String getOp() {
-        return op;
-    }
-
-    public void setOp(final String op) {
-        this.op = op;
-    }
-
     public PendingDTO() {
-
     }
 
     public PendingDTO(int seqId, int XID, String tableName, String op) {
@@ -32,15 +24,23 @@ public class PendingDTO {
         this.op = op;
     }
 
+    public String getOp() {
+        return op;
+    }
+
+    public void setOp(final String op) {
+        this.op = op;
+    }
+
     public int getSeqId() {
         return seqId;
     }
 
-    public void setSeqId(final int  seqId) {
+    public void setSeqId(final int seqId) {
         this.seqId = seqId;
     }
 
-    public  int  getXID() {
+    public int getXID() {
         return XID;
     }
 
@@ -56,19 +56,18 @@ public class PendingDTO {
         this.tableName = tableName;
     }
 
-
     @Override
     public int hashCode() {
-     return HashCodeBuilder.reflectionHashCode( this);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public String toString() {
-     return ToStringBuilder.reflectionToString(this);
+        return ToStringBuilder.reflectionToString(this);
     }
 
     @Override
     public boolean equals(final Object o) {
-     return EqualsBuilder.reflectionEquals(this,o);
+        return EqualsBuilder.reflectionEquals(this, o);
     }
 }

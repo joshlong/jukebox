@@ -21,6 +21,7 @@ public class ReplicationUtils {
 
     public ReplicationContext buildReplicationContextForBundle(String bundleName) {
         ReplicationContext replicationContext = new ReplicationContext(this, bundleName);
+
         return replicationContext;
     }
 

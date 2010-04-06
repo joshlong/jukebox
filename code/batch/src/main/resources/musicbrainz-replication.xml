@@ -44,8 +44,7 @@
         </step>
     </job>
 
-    <!--<beans:bean id="pendingDTOItemWriter" class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingDTOItemWriter" p:jdbcTemplate-ref="musicbrainzJdbcTemplate"/>-->
-
+  
     <beans:bean id="pendingWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" scope="step"
                 p:dataSource-ref="musicbrainzDataSource"  >
         

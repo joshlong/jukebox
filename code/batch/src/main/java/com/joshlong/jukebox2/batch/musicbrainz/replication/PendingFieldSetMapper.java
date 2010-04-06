@@ -19,8 +19,6 @@ public class PendingFieldSetMapper implements FieldSetMapper<PendingDTO> {
         pendingDTO.setXID(fieldSet.readInt("XID"));
         pendingDTO.setTableName(fieldSet.readString("TableName"));
 
-        System.out.println( pendingDTO.toString());
-
         return pendingDTO;
     }
 }
