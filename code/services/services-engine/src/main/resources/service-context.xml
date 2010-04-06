@@ -38,7 +38,7 @@
     <bean id="baseService" abstract="true" lazy-init="true">
     </bean>
 
-    <tx:advice id="txAdvice" transaction-manager="jtaTransactionManager">
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
         <tx:attributes>
             <tx:method propagation="REQUIRED" name="*" rollback-for="BlogException,WorkflowException"/>
         </tx:attributes>
@@ -50,7 +50,7 @@
     </bean>
 
 
-    <bean id="hibernateSessionFactory" depends-on="dataSource"
+    <bean id="hibernateSessionFactory" depends-on="musicbrainzDataSource"
           class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="mappingLocations" value="classpath*:/org/jbpm/**/*.hbm.xml"/>
         <property name="entityInterceptor">
@@ -70,7 +70,7 @@
                 <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
                 <prop key="net.sf.ehcache.configurationResourceName">ehcache.xml</prop>
-                <prop key="hibernate.dialect">${dataSource.dialect}</prop>
+                <prop key="hibernate.dialect">${jukebox2.dataSource.dialect}</prop>
                 <prop key="hibernate.max_fetch_depth">3</prop>
                 <prop key="hibernate.default_batch_fetch_size">30</prop>
                 <prop key="hibernate.jdbc.batch_versioned_data">true</prop>
@@ -82,7 +82,7 @@
                 <prop key="hibernate.connection.release_mode">after_statement</prop>
             </props>
         </property>
-        <property name="dataSource" ref="dataSource"/>
+        <property name="dataSource" ref="musicbrainzDataSource"/>
         <property name="annotatedClasses">
 
             <list>

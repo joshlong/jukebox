@@ -52,10 +52,10 @@ public class UserServiceImpl extends BaseService /*implements UserService*/ {
         SiteAdmin siteAdmin = new SiteAdmin();
 
         UserCredentials uc = getUserCredentialsById(userCredentialsId);
-        getHibernateTemplate().saveOrUpdate(siteAdmin);
+        hibernateTemplate.saveOrUpdate(siteAdmin);
         uc.setSiteAdmin(siteAdmin);
 
-        getHibernateTemplate().saveOrUpdate(uc);
+        hibernateTemplate.saveOrUpdate(uc);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("siteAdminId", siteAdmin.getId());
 
@@ -67,14 +67,14 @@ public class UserServiceImpl extends BaseService /*implements UserService*/ {
 
 
     public UserCredentials getUserCredentialsById(long ucId) {
-        return (UserCredentials) getHibernateTemplate().get(
+        return (UserCredentials) hibernateTemplate.get(
                 UserCredentials.class, ucId);
 
     }
 
     public UserCredentials getUserCredentialsByEmail(String email) {
         if (!StringUtils.isEmpty(email)) {
-            UserCredentials uc = firstOrNull(getHibernateTemplate()
+            UserCredentials uc = firstOrNull(hibernateTemplate
                     .findByNamedParam(
                     "select uc from "
                             + UserCredentials.class.getName()
@@ -89,7 +89,7 @@ public class UserServiceImpl extends BaseService /*implements UserService*/ {
 
 
     public UserCredentials getUserCredentialsByLogin(String userName) {
-        return firstOrNull(getHibernateTemplate().findByNamedParam(
+        return firstOrNull(hibernateTemplate.findByNamedParam(
                 "select uc from " + UserCredentials.class.getName()
                         + " uc where uc.userName = :uc", "uc", userName));
     }
@@ -125,7 +125,7 @@ public class UserServiceImpl extends BaseService /*implements UserService*/ {
         // first we check for dupes
         if (getUserCredentialsByEmail(email) == null
                 && getUserCredentialsByLogin(userName) == null) {
-            getHibernateTemplate().saveOrUpdate(userCredentials);
+            hibernateTemplate.saveOrUpdate(userCredentials);
             return userCredentials;
         }
         throw new QuietRiotException("Couldn't createUserCredential"
@@ -135,7 +135,7 @@ public class UserServiceImpl extends BaseService /*implements UserService*/ {
     public void setUserCredentialsActive(long ucId, boolean activeState) {
         UserCredentials userCredentials = getUserCredentialsById(ucId);
         userCredentials.setActive(activeState);
-        getHibernateTemplate().saveOrUpdate(userCredentials);
+        hibernateTemplate.saveOrUpdate(userCredentials);
 
     }
     // simple for now - this is mainly only used in communiques sent to the user
