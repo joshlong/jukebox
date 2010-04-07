@@ -33,10 +33,13 @@ public class ReplicationProcessor implements InitializingBean {
 
     public void processReplicationBundle(String bundleKey) throws Throwable {
         File pendingFile = this.replicationUtils.resolvePending(bundleKey);
+        File pendingDataFile = this.replicationUtils.resolvePendingData(bundleKey);
+
         System.out.println("Reading pending file: " + pendingFile.getAbsolutePath());
 
         Map<String, JobParameter> parameterMap = new HashMap<String, JobParameter>();
         parameterMap.put("bundleName", new JobParameter(bundleKey));
+        parameterMap.put("pendingDataFile", new JobParameter(pendingDataFile.getAbsolutePath()));
         parameterMap.put("pendingFile", new JobParameter(pendingFile.getAbsolutePath()));
         parameterMap.put("now", new JobParameter(System.currentTimeMillis()));
         // this job wil have 3 steps: 'pending','pendingdata', and updating the schema/sequence/whatver so we have a way of checking for dupes
