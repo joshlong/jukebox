@@ -1,13 +1,21 @@
 package com.joshlong.jukebox2.batch.musicbrainz.replication;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+
+import org.apache.log4j.Logger;
+
 import org.springframework.batch.item.ItemWriter;
+
 import org.springframework.beans.factory.annotation.Required;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.List;
 
 
@@ -15,6 +23,7 @@ import java.util.List;
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
 public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> {
+    private static final Logger logger = Logger.getLogger(PerformReplicationItemWriter.class);
     private String selectOperationsForTransactionSql;
     private JdbcTemplate jdbcTemplate;
     private RowMapper<WorkDTO> workDTORowMapper;
@@ -34,23 +43,42 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    void applyInsert( WorkDTO workDTO) throws Exception{
+    void applyDelete(WorkDTO workDTO) throws Exception {
+    }
 
+    void applyUpdate(WorkDTO workDTO) throws Exception {
+    }
+
+    void applyInsert(WorkDTO workDTO) throws Exception {
     }
 
     void processPendingWorkDTO(PendingWorkDTO pendingWorkDTO)
         throws Exception {
-        this.jdbcTemplate.query(this.selectOperationsForTransactionSql,new RowCallbackHandler(){
-            public void processRow(final ResultSet rs) throws SQLException {
+        this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
+            new RowCallbackHandler() {
+                public void processRow(final ResultSet rs)
+                    throws SQLException {
+                    WorkDTO workDTO = workDTORowMapper.mapRow(rs, 0);
+                    System.out.println(StringUtils.repeat("=", 100));
+                    System.out.println(workDTO);
 
+                    try {
+                        if (workDTO.isInsert()) {
+                            applyInsert(workDTO);
+                        }
 
+                        if (workDTO.isDelete()) {
+                            applyDelete(workDTO);
+                        }
 
-                WorkDTO workDTO = workDTORowMapper.mapRow( rs,0);
-
-                 System.out.println(workDTO ) ;
-
-            }
-        },pendingWorkDTO.getXid());
+                        if (workDTO.isUpdate()) {
+                            applyUpdate(workDTO);
+                        }
+                    } catch (Exception e) {
+                        logger.debug("Exception occurred: " + ExceptionUtils.getFullStackTrace(e));
+                    }
+                }
+            }, pendingWorkDTO.getXid());
     }
 
     public void write(final List<?extends PendingWorkDTO> pendingWorkDTOs)
