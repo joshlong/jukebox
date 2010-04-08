@@ -34,6 +34,11 @@
             />
 
 
+    <beans:bean id="dataSourceTransactionManager"
+                class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+                p:dataSource-ref="musicbrainzDataSource" p:nestedTransactionAllowed="true"
+                p:rollbackOnCommitFailure="true"/>
+
     <!-- actual Spring batch beans, now -->
 
     <job job-repository="jobRepository" id="loadReplicationDataJob">
@@ -42,35 +47,74 @@
                 <chunk reader="pendingReader" writer="pendingWriter" commit-interval="100"/>
             </tasklet>
         </step>
-        <step id="pendingData">
+        <step id="pendingData" next="performReplications">
             <tasklet>
                 <chunk reader="pendingDataReader" writer="pendingDataWriter" commit-interval="100"/>
             </tasklet>
         </step>
+        <step id="performReplications">
+            <tasklet transaction-manager="dataSourceTransactionManager">
+                <chunk reader="workToBeDoneReader" writer="workToBeDoneWriter" commit-interval="1"/>
+            </tasklet>
+        </step>
     </job>
 
-  
+    <beans:bean id="workToBeDoneWriter" scope="step"
+                class="com.joshlong.jukebox2.batch.musicbrainz.replication.PerformReplicationItemWriter">
+        <beans:property name="workDTORowMapper">
+            <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.WorkDTORowMapper"/>
+        </beans:property>
+        <beans:property name="jdbcTemplate" ref="musicbrainzJdbcTemplate"/>
+        <beans:property name="selectOperationsForTransactionSql">
+            <beans:value>
+                SELECT pnd."seq_id", pnd."table_name", pnd."op", pnddata."is_key", pnddata."data" AS "data" FROM
+                "pending" pnd, "pending_data" pnddata
+                WHERE pnd."seq_id" = pnddata."seq_id" AND pnd."xid" =?
+                ORDER BY "seq_id", "is_key" DESC
+            </beans:value>
+        </beans:property>
+    </beans:bean>
+    <beans:bean id="workToBeDoneReader" class="org.springframework.batch.item.database.JdbcCursorItemReader"
+                scope="step">
+        <beans:property name="dataSource" ref="musicbrainzDataSource"/>
+        <beans:property name="rowMapper">
+            <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingWorkDTORowMapper"/>
+        </beans:property>
+        <beans:property name="sql">
+            <beans:value>
+                SELECT pd."xid",MAX("seq_id") FROM "pending" pd
+                GROUP BY pd."xid" ORDER BY MAX(pd."seq_id")
+
+            </beans:value>
+        </beans:property>
+    </beans:bean>
+
     <beans:bean id="pendingDataWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" scope="step"
-                p:dataSource-ref="musicbrainzDataSource"  >
-        
+                p:dataSource-ref="musicbrainzDataSource">
+
         <beans:property name="itemSqlParameterSourceProvider">
             <beans:bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
         </beans:property>
-        <beans:property name="sql"
-                        value="INSERT INTO &quot;pending_data&quot;(seq_id,is_key,data) VALUES(  :seqId, :key, :data )"/>
+        <beans:property name="sql">
+            <beans:value>
+                INSERT INTO "pending_data"(seq_id,is_key,data)
+                VALUES( :seqId, :key, :data )
+            </beans:value>
+        </beans:property>
     </beans:bean>
 
 
-
-    <beans:bean id="pendingDataReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step" p:resource="file://#{jobParameters['pendingDataFile']}">
+    <beans:bean id="pendingDataReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step"
+                p:resource="file://#{jobParameters['pendingDataFile']}">
         <beans:property name="lineMapper">
             <beans:bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
                 <beans:property name="lineTokenizer">
                     <beans:bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
                         <beans:property name="delimiter">
-                            <util:constant static-field="org.springframework.batch.item.file.transform.DelimitedLineTokenizer.DELIMITER_TAB"/>
+                            <util:constant
+                                    static-field="org.springframework.batch.item.file.transform.DelimitedLineTokenizer.DELIMITER_TAB"/>
                         </beans:property>
-                        <beans:property name="names" value="SeqId,IsKey,Data" />
+                        <beans:property name="names" value="SeqId,IsKey,Data"/>
                     </beans:bean>
                 </beans:property>
                 <beans:property name="fieldSetMapper">
@@ -81,34 +125,35 @@
     </beans:bean>
 
     <beans:bean id="pendingWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" scope="step"
-                  p:dataSource-ref="musicbrainzDataSource"  >
+                p:dataSource-ref="musicbrainzDataSource">
 
-          <beans:property name="itemSqlParameterSourceProvider">
-              <beans:bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
-          </beans:property>
-          <beans:property name="sql"
-                          value="INSERT INTO &quot;pending&quot;(seq_id,table_name,op,xid) VALUES(  :seqId, :tableName, :op, :XID )"/>
-      </beans:bean>
+        <beans:property name="itemSqlParameterSourceProvider">
+            <beans:bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
+        </beans:property>
+        <beans:property name="sql"
+                        value="INSERT INTO &quot;pending&quot;(seq_id,table_name,op,xid) VALUES(  :seqId, :tableName, :op, :XID )"/>
+    </beans:bean>
 
 
-
-      <beans:bean id="pendingReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step" p:resource="file://#{jobParameters['pendingFile']}">
-          <beans:property name="lineMapper">
-              <beans:bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
-                  <beans:property name="lineTokenizer">
-                      <beans:bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
-                          <beans:property name="delimiter">
-                              <util:constant static-field="org.springframework.batch.item.file.transform.DelimitedLineTokenizer.DELIMITER_TAB"/>
-                          </beans:property>
-                          <beans:property name="names" value="SeqId,TableName,Op,XID" />
-                      </beans:bean>
-                  </beans:property>
-                  <beans:property name="fieldSetMapper">
-                      <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingFieldSetMapper"/>
-                  </beans:property>
-              </beans:bean>
-          </beans:property>
-      </beans:bean>
+    <beans:bean id="pendingReader" class="org.springframework.batch.item.file.FlatFileItemReader" scope="step"
+                p:resource="file://#{jobParameters['pendingFile']}">
+        <beans:property name="lineMapper">
+            <beans:bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+                <beans:property name="lineTokenizer">
+                    <beans:bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer">
+                        <beans:property name="delimiter">
+                            <util:constant
+                                    static-field="org.springframework.batch.item.file.transform.DelimitedLineTokenizer.DELIMITER_TAB"/>
+                        </beans:property>
+                        <beans:property name="names" value="SeqId,TableName,Op,XID"/>
+                    </beans:bean>
+                </beans:property>
+                <beans:property name="fieldSetMapper">
+                    <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.PendingFieldSetMapper"/>
+                </beans:property>
+            </beans:bean>
+        </beans:property>
+    </beans:bean>
 
 
 </beans:beans>
