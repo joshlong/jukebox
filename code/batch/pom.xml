@@ -76,8 +76,8 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <packageName>com.seogenie.batch.sitemapscreator2</packageName>
-                            <mainClass>com.seogenie.batch.sitemapscreator2.SiteMap2Main</mainClass>
+                            <packageName>com.foo.batch.bar</packageName>
+                            <mainClass>com.foo.batch.bar.SiteMap2Main</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                         </manifest>

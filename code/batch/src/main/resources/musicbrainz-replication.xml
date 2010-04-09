@@ -39,7 +39,18 @@
                 p:dataSource-ref="musicbrainzDataSource" p:nestedTransactionAllowed="true"
                 p:rollbackOnCommitFailure="true"/>
 
+
+
+    <beans:bean id="dataTupleUnpacker" class="com.joshlong.jukebox2.batch.musicbrainz.replication.DataTupleUnpacker">
+        <beans:property name="unpackingRegex">
+            <beans:value><![CDATA[
+                (\"([^\"]*)\")=(\'([^\']*)\'|\s+)    
+            ]]></beans:value>
+        </beans:property>
+
+    </beans:bean>
     <!-- actual Spring batch beans, now -->
+
 
     <job job-repository="jobRepository" id="loadReplicationDataJob">
         <step id="pending" next="pendingData">

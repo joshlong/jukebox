@@ -27,6 +27,12 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
     private String selectOperationsForTransactionSql;
     private JdbcTemplate jdbcTemplate;
     private RowMapper<WorkDTO> workDTORowMapper;
+    private DataTupleUnpacker dataTupleUnpacker;
+
+    @Required
+    public void setDataTupleUnpacker(final DataTupleUnpacker dataTupleUnpacker) {
+        this.dataTupleUnpacker = dataTupleUnpacker;
+    }
 
     @Required
     public void setWorkDTORowMapper(final RowMapper<WorkDTO> workDTORowMapper) {
@@ -51,6 +57,9 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
 
     void applyInsert(WorkDTO workDTO) throws Exception {
     }
+
+   // todo - you have a parser that can unpack the data in the {@link WorkDTO}'s data field
+     // todo now u should be able to create a where clause and implement the prepare_delete,prepare_insert,prepare_update from dbmirror.pm
 
     void processPendingWorkDTO(PendingWorkDTO pendingWorkDTO)
         throws Exception {
