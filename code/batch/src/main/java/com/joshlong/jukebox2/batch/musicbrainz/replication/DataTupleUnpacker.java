@@ -50,7 +50,7 @@ public class DataTupleUnpacker implements InitializingBean {
                 }
 
                 if (v.endsWith("'")) {
-                    v = v.substring(0, v.length());
+                    v = v.substring(0, v.length()-1);
                 }
             }
             kvs.put(k, v);

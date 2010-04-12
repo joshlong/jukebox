@@ -40,7 +40,6 @@
                 p:rollbackOnCommitFailure="true"/>
 
 
-
     <beans:bean id="dataTupleUnpacker" class="com.joshlong.jukebox2.batch.musicbrainz.replication.DataTupleUnpacker">
         <beans:property name="unpackingRegex">
             <beans:value><![CDATA[
@@ -72,6 +71,7 @@
 
     <beans:bean id="workToBeDoneWriter" scope="step"
                 class="com.joshlong.jukebox2.batch.musicbrainz.replication.PerformReplicationItemWriter">
+        <beans:property name="dataTupleUnpacker" ref="dataTupleUnpacker"/>
         <beans:property name="workDTORowMapper">
             <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.WorkDTORowMapper"/>
         </beans:property>
@@ -85,6 +85,7 @@
             </beans:value>
         </beans:property>
     </beans:bean>
+    
     <beans:bean id="workToBeDoneReader" class="org.springframework.batch.item.database.JdbcCursorItemReader"
                 scope="step">
         <beans:property name="dataSource" ref="musicbrainzDataSource"/>
