@@ -2,19 +2,24 @@ package com.joshlong.jukebox2.batch.musicbrainz.replication;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+
 import org.apache.log4j.Logger;
+
 import org.springframework.batch.item.ItemWriter;
+
 import org.springframework.beans.factory.annotation.Required;
+
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
@@ -46,40 +51,85 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    void applyDelete(final ResultSet rs, WorkDTO workDTO) throws Throwable {
+    void applyDelete(final ResultSet rs, WorkDTO workDTO)
+        throws Throwable {
         Map<String, String> kvs = this.dataTuple(workDTO);
 
         WhereClause wc = new WhereClause(kvs);
         String delSQL = String.format("DELETE FROM \"%s\" WHERE %s   ", workDTO.getTableName(), wc.getWhereClauseSQL());
+        final List<String> args = new ArrayList<String>();
+        args.addAll(Arrays.asList(wc.getArguments()));
 
-        //   System.out.println(delSQL);
+        this.jdbcTemplate.update(delSQL,
+            new PreparedStatementSetter() {
+                public void setValues(final PreparedStatement ps)
+                    throws SQLException {
+                    int ctr = 0;
+
+                    for (String v : args) {
+                        ps.setString(ctr, v);
+                        ctr += 1;
+                    }
+                }
+            });
     }
 
-    void applyUpdate(final ResultSet rs, WorkDTO workDTO) throws Throwable {
+    void applyUpdate(final ResultSet rs, WorkDTO workDTO)
+        throws Throwable {
         // the id to which the update applies
-        WhereClause whereClause = new WhereClause(this.dataTuple(workDTO));
+        final WhereClause whereClause = new WhereClause(this.dataTuple(workDTO));
 
-        if (!rs.next()) throw new RuntimeException("AAHHHH!! Something's *very* wrong here!");
+        if (!rs.next()) {
+            throw new RuntimeException("AAHHHH!! Something's *very* wrong here!");
+        }
 
         WorkDTO nextRow = this.workDTORowMapper.mapRow(rs, 0);
-        WhereClause whereClause2 = new WhereClause(this.dataTuple(nextRow));
+        final WhereClause whereClause2 = new WhereClause(this.dataTuple(nextRow));
 
-        String upSql = String.format("UPDATE \"%s\" SET %s WHERE %s ",
-                                         workDTO.getTableName(),
-                                         whereClause2.getSetClauseSQL(),
-                                         whereClause .getWhereClauseSQL());
-        System.out.println( StringUtils.join( whereClause2.getArguments(), ","));
-        System.out.println( StringUtils.join( whereClause.getArguments(), ","));
+        String upSql = String.format("UPDATE \"%s\" SET %s WHERE %s ", workDTO.getTableName(), whereClause2.getSetClauseSQL(), whereClause.getWhereClauseSQL());
+        System.out.println(StringUtils.join(whereClause2.getArguments(), ","));
+        System.out.println(StringUtils.join(whereClause.getArguments(), ","));
 
         System.out.println(upSql);
 
+        final List<String> args = new ArrayList<String>();
+        args.addAll(Arrays.asList(whereClause2.getArguments()));
+        args.addAll(Arrays.asList(whereClause.getArguments()));
+
+        this.jdbcTemplate.update(upSql,
+            new PreparedStatementSetter() {
+                public void setValues(final PreparedStatement ps)
+                    throws SQLException {
+                    int ctr = 0;
+
+                    for (String v : args) {
+                        ps.setString(ctr, v);
+                        ctr += 1;
+                    }
+                }
+            });
     }
 
-    void applyInsert(final ResultSet rs, WorkDTO workDTO) throws Throwable {
+    void applyInsert(final ResultSet rs, WorkDTO workDTO)
+        throws Throwable {
         Map<String, String> kvs = this.dataTuple(workDTO);
         WhereClause whereClause = new WhereClause(kvs);
-        String insertSQL = String.format("INSERT INTO \"%s\"( %s ) VALUES( %s )", workDTO.getTableName(),
-                                         whereClause.getColumnNamesClauseSQL(), whereClause.getArgumentsClauseSQL());
+        String insertSQL = String.format("INSERT INTO \"%s\"( %s ) VALUES( %s )", workDTO.getTableName(), whereClause.getColumnNamesClauseSQL(), whereClause.getArgumentsClauseSQL());
+        final List<String> args = new ArrayList<String>();
+        args.addAll(Arrays.asList(whereClause.getArguments()));
+
+        this.jdbcTemplate.update(insertSQL,
+            new PreparedStatementSetter() {
+                public void setValues(final PreparedStatement ps)
+                    throws SQLException {
+                    int ctr = 0;
+
+                    for (String v : args) {
+                        ps.setString(ctr, v);
+                        ctr += 1;
+                    }
+                }
+            });
 
         //  System.out.println(insertSQL);
     }
@@ -90,42 +140,38 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
 
     // todo - you have a parser that can unpack the data in the {@link WorkDTO}'s data field
     // todo now u should be able to create a where clause and implement the prepare_delete,prepare_insert,prepare_update from dbmirror.pm
-
     void processPendingWorkDTO(PendingWorkDTO pendingWorkDTO)
-            throws Exception {
-
+        throws Exception {
         //  List<WorkDTO> rowsOfWorkDTOs = new ArrayList <WorkDTO>() ;
-
         this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
-                                new RowCallbackHandler() {
-                                    public void processRow(final ResultSet rs)
-                                            throws SQLException {
-                                        WorkDTO workDTO = workDTORowMapper.mapRow(rs, 0);
-                                        System.out.println(StringUtils.repeat("=", 100));
+            new RowCallbackHandler() {
+                public void processRow(final ResultSet rs)
+                    throws SQLException {
+                    WorkDTO workDTO = workDTORowMapper.mapRow(rs, 0);
+                    System.out.println(StringUtils.repeat("=", 100));
 
-                                        // System.out.println(workDTO);
-                                        try {
-                                            if (workDTO.isInsert()) {
-                                                applyInsert(rs, workDTO);
-                                            }
+                    // System.out.println(workDTO);
+                    try {
+                        if (workDTO.isInsert()) {
+                            applyInsert(rs, workDTO);
+                        }
 
-                                            if (workDTO.isDelete()) {
-                                                applyDelete(rs, workDTO);
-                                            }
+                        if (workDTO.isDelete()) {
+                            applyDelete(rs, workDTO);
+                        }
 
-                                            if (workDTO.isUpdate()) {
-                                                applyUpdate(rs, workDTO);
-                                            }
-                                        }
-                                        catch (Throwable e) {
-                                            logger.debug("Exception occurred: " + ExceptionUtils.getFullStackTrace(e));
-                                        }
-                                    }
-                                }, pendingWorkDTO.getXid());
+                        if (workDTO.isUpdate()) {
+                            applyUpdate(rs, workDTO);
+                        }
+                    } catch (Throwable e) {
+                        logger.debug("Exception occurred: " + ExceptionUtils.getFullStackTrace(e));
+                    }
+                }
+            }, pendingWorkDTO.getXid());
     }
 
-    public void write(final List<? extends PendingWorkDTO> pendingWorkDTOs)
-            throws Exception {
+    public void write(final List<?extends PendingWorkDTO> pendingWorkDTOs)
+        throws Exception {
         for (PendingWorkDTO pendingWorkDTO : pendingWorkDTOs) {
             processPendingWorkDTO(pendingWorkDTO);
         }
@@ -147,7 +193,8 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
      *
      */
     static class WhereClause {
-        private String whereClauseSQL,setClauseSQL;
+        private String whereClauseSQL;
+        private String setClauseSQL;
         private List<String> arguments;
         private List<String> columnNames;
         private Map<String, String> kvs;
@@ -174,14 +221,14 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
                 if (!StringUtils.isEmpty(v)) {
                     conditions.add(String.format("\"%s\" = ?", k));
                     arguments.add(v);
-                }
-                else {
+                } else {
                     conditions.add(String.format("\"%s\" IS NULL", k));
                 }
 
                 columnNames.add(k);
             }
-            this.setClauseSQL = StringUtils.join(conditions.iterator() ,",");
+
+            this.setClauseSQL = StringUtils.join(conditions.iterator(), ",");
 
             this.whereClauseSQL = StringUtils.join(conditions.iterator(), " AND ");
         }
