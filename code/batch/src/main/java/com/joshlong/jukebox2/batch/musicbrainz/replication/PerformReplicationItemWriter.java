@@ -72,6 +72,7 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
                     }
                 }
             });
+        System.out.println(delSQL);
     }
 
     void applyUpdate(final ResultSet rs, WorkDTO workDTO)
@@ -131,7 +132,7 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
                 }
             });
 
-        //  System.out.println(insertSQL);
+        System.out.println(insertSQL);
     }
 
     Map<String, String> dataTuple(WorkDTO dto) throws Throwable {
@@ -143,7 +144,9 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
     void processPendingWorkDTO(PendingWorkDTO pendingWorkDTO)
         throws Exception {
         //  List<WorkDTO> rowsOfWorkDTOs = new ArrayList <WorkDTO>() ;
-        this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
+      //  try{
+            this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
+
             new RowCallbackHandler() {
                 public void processRow(final ResultSet rs)
                     throws SQLException {
@@ -168,6 +171,11 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
                     }
                 }
             }, pendingWorkDTO.getXid());
+
+            this.jdbcTemplate.execute("DELETE FROM \"pending\" WHERE \"xid\"=" +
+                                      "'" + pendingWorkDTO.getXid() +"'");
+
+     ///   } finally{}
     }
 
     public void write(final List<?extends PendingWorkDTO> pendingWorkDTOs)

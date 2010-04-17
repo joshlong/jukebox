@@ -6,7 +6,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -23,15 +22,15 @@ import java.util.Map;
  *
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
-public class ReplicationProcessor implements InitializingBean {
+public class ReplicationProcessor   {
     private static final Logger logger = Logger.getLogger(ReplicationProcessor.class);
-
     private ReplicationUtils replicationUtils;
     private JdbcTemplate jdbcTemplate;
     private Job loadPendingJob;
     private JobLauncher jobLauncher;
 
-    public void processReplicationBundle(String bundleKey) throws Throwable {
+    public void processReplicationBundle(String bundleKey)
+        throws Throwable {
         File pendingFile = this.replicationUtils.resolvePending(bundleKey);
         File pendingDataFile = this.replicationUtils.resolvePendingData(bundleKey);
 
@@ -42,19 +41,17 @@ public class ReplicationProcessor implements InitializingBean {
         parameterMap.put("pendingDataFile", new JobParameter(pendingDataFile.getAbsolutePath()));
         parameterMap.put("pendingFile", new JobParameter(pendingFile.getAbsolutePath()));
         parameterMap.put("now", new JobParameter(System.currentTimeMillis()));
-        // this job wil have 3 steps: 'pending','pendingdata', and updating the schema/sequence/whatver so we have a way of checking for dupes
-        JobExecution jobExecution=this.jobLauncher.run(loadPendingJob, new JobParameters(parameterMap));
-        
-        logger.info( String.format("Finished loading data from 'Pending.' The exit status is %s", jobExecution.getExitStatus().getExitCode()));
-    }
 
-    public void afterPropertiesSet() throws Exception {
+        // this job wil have 3 steps: 'pending','pendingdata', and updating the schema/sequence/whatver so we have a way of checking for dupes
+        JobExecution jobExecution = this.jobLauncher.run(loadPendingJob, new JobParameters(parameterMap));
+
+        logger.info(String.format("Finished loading data from 'Pending.' The exit status is %s", jobExecution.getExitStatus().getExitCode()));
     }
 
     public static void main(String[] args) throws Throwable {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("musicbrainz-replication.xml");
         ReplicationProcessor replicationProcessor = applicationContext.getBean(ReplicationProcessor.class);
-        replicationProcessor.processReplicationBundle("replication-37827");
+        replicationProcessor.processReplicationBundle("replication-23211");
     }
 
     @Required
