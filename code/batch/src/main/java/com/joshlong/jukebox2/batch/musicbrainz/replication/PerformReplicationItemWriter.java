@@ -144,14 +144,14 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
     void processPendingWorkDTO(PendingWorkDTO pendingWorkDTO)
         throws Exception {
         //  List<WorkDTO> rowsOfWorkDTOs = new ArrayList <WorkDTO>() ;
-      //  try{
-            this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
-
+        //  try{
+        this.jdbcTemplate.query(this.selectOperationsForTransactionSql,
             new RowCallbackHandler() {
                 public void processRow(final ResultSet rs)
                     throws SQLException {
                     WorkDTO workDTO = workDTORowMapper.mapRow(rs, 0);
-                    System.out.println(StringUtils.repeat("=", 100));
+
+                    // System.out.println(StringUtils.repeat("=", 100));
 
                     // System.out.println(workDTO);
                     try {
@@ -172,10 +172,9 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
                 }
             }, pendingWorkDTO.getXid());
 
-            this.jdbcTemplate.execute("DELETE FROM \"pending\" WHERE \"xid\"=" +
-                                      "'" + pendingWorkDTO.getXid() +"'");
+        this.jdbcTemplate.execute("DELETE FROM \"pending\" WHERE \"xid\"=" + "'" + pendingWorkDTO.getXid() + "'");
 
-     ///   } finally{}
+        ///   } finally{}
     }
 
     public void write(final List<?extends PendingWorkDTO> pendingWorkDTOs)
@@ -185,30 +184,18 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
         }
     }
 
-    public static void main(String[] a) throws Throwable {
-        Map<String, String> kvs = new HashMap<String, String>();
-        kvs.put("age", "222");
-        kvs.put("firstName", "josh");
-
-        WhereClause whereClause = new WhereClause(kvs);
-
-        System.out.println(whereClause);
-        System.out.println(StringUtils.join(whereClause.getArguments(), ","));
-    }
-
     /**
-     *
-     *
+     * Models the important bits of a 'where' clause including generation of the SQL for an update and insert
      */
     static class WhereClause {
         private String whereClauseSQL;
         private String setClauseSQL;
         private List<String> arguments;
         private List<String> columnNames;
-        private Map<String, String> kvs;
+        private Map<String, String> predicateKeyValuePairs;
 
-        public WhereClause(Map<String, String> kvs) {
-            this.kvs = kvs;
+        public WhereClause(Map<String, String> predicateKeyValuePairs) {
+            this.predicateKeyValuePairs = predicateKeyValuePairs;
             this.arguments = new ArrayList<String>();
             this.columnNames = new ArrayList<String>();
 
@@ -216,15 +203,15 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
         }
 
         void build() {
-            if ((kvs == null) || (kvs.size() == 0)) {
+            if ((predicateKeyValuePairs == null) || (predicateKeyValuePairs.size() == 0)) {
                 return;
             }
 
-            List<String> keys = new ArrayList<String>(kvs.keySet());
+            List<String> keys = new ArrayList<String>(predicateKeyValuePairs.keySet());
             List<String> conditions = new ArrayList<String>();
 
             for (String k : keys) {
-                String v = kvs.get(k);
+                String v = predicateKeyValuePairs.get(k);
 
                 if (!StringUtils.isEmpty(v)) {
                     conditions.add(String.format("\"%s\" = ?", k));
@@ -237,7 +224,6 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
             }
 
             this.setClauseSQL = StringUtils.join(conditions.iterator(), ",");
-
             this.whereClauseSQL = StringUtils.join(conditions.iterator(), " AND ");
         }
 
@@ -250,13 +236,13 @@ public class PerformReplicationItemWriter implements ItemWriter<PendingWorkDTO> 
         }
 
         public String getArgumentsClauseSQL() {
-            String[] cnt = new String[this.arguments.size()];
+            String[] args = new String[this.arguments.size()];
 
-            for (int i = 0; i < cnt.length; i++) {
-                cnt[i] = "?";
+            for (int i = 0; i < args.length; i++) {
+                args[i] = "?";
             }
 
-            return StringUtils.join(cnt, ",");
+            return StringUtils.join(args, ",");
         }
 
         public String getWhereClauseSQL() {

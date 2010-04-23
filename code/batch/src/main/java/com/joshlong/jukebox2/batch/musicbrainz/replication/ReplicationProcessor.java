@@ -51,7 +51,7 @@ public class ReplicationProcessor   {
     public static void main(String[] args) throws Throwable {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("musicbrainz-replication.xml");
         ReplicationProcessor replicationProcessor = applicationContext.getBean(ReplicationProcessor.class);
-        replicationProcessor.processReplicationBundle("replication-23211");
+        replicationProcessor.processReplicationBundle("replication-37828");
     }
 
     @Required

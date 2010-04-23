@@ -1,12 +1,4 @@
 package com.joshlong.jukebox2.services.impl;
-
-
-/**
- * This is code for handling the storage of files on the file system (presumably some sort of SAN mount or something)
- *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
- *
- */
 import com.joshlong.jukebox2.model.ManagedFile;
 import com.joshlong.jukebox2.model.StorageNode;
 import com.joshlong.jukebox2.services.ManagedFileService;
@@ -31,7 +23,13 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.*;
 
-
+/**
+ *
+ * This is code for handling the storage of files on the file system (presumably some sort of SAN mount or something).
+ *
+ * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
+ *
+ */
 public class ManagedFileServiceImpl extends BaseService implements ManagedFileService {
     private static String MANAGED_FILE_MNT_DIRECTORY = "managedFiles";
     private String assetPathMask = "%010d/%010d.%s";
