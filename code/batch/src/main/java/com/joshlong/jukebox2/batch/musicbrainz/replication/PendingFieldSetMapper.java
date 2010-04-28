@@ -3,7 +3,6 @@ package com.joshlong.jukebox2.batch.musicbrainz.replication;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;
 
-
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */

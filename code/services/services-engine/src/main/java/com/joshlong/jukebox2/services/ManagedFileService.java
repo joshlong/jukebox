@@ -6,7 +6,6 @@ import com.joshlong.jukebox2.services.impl.util.ManagedFileMountPrefix;
 
 import java.util.Collection;
 
-
 /**
  * This provides all the facilities required to interact with the file system
  *
@@ -35,7 +34,11 @@ public interface ManagedFileService {
 
     boolean isManagedFileReady(long managedFileId);
 
-    ManagedFile createManagedFile(String originalFileName, String extension, ManagedFileMountPrefix prefix, double byteSize, int priority);
+    ManagedFile createManagedFile(String originalFileName,
+                                  String extension,
+                                  ManagedFileMountPrefix prefix,
+                                  double byteSize,
+                                  int priority);
 
     Collection<StorageNode> getAvailableStorageNodes();
 

@@ -2,7 +2,6 @@ package com.joshlong.jukebox2.batch.musicbrainz.replication;
 
 import java.io.File;
 
-
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */

@@ -1,6 +1,5 @@
 package com.joshlong.jukebox2.services.workflow;
 
-
 import org.jbpm.graph.exe.ProcessInstance;
 
 import java.io.Serializable;
@@ -9,9 +8,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * @author Josh Long
- *         <p/>
- *         this is designed to handle any and all workflow requirements
+ * @author Josh Long this is designed to handle any and all workflow requirements
  */
 public interface WorkflowService extends Serializable {
 

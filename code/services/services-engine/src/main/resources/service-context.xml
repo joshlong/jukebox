@@ -11,10 +11,10 @@
         xsi:schemaLocation="http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core-5.3.0.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd "> <!-- this information has proven invaluable: http://ourcraft.wordpress.com/tag/bitronix/ -->
 
 
-    <import resource="datasource-context.xml" />
+    <import resource="datasource-context.xml"/>
 
     <aop:aspectj-autoproxy/>
-    <context:annotation-config />
+    <context:annotation-config/>
     <context:component-scan base-package="com.joshlong.jukebox2.services"/>
 
 
@@ -28,9 +28,11 @@
     </aop:config>
 
 
-    <bean id="workflowService" parent="baseService" class="com.joshlong.jukebox2.services.impl.WorkflowServiceImpl" p:bpmsStartedPingDestination-ref="bpmsPing"/>
+    <bean id="workflowService" parent="baseService" class="com.joshlong.jukebox2.services.impl.WorkflowServiceImpl"
+          p:bpmsStartedPingDestination-ref="bpmsPing"/>
 
-    <bean id="managedFileService" parent="baseService" class="com.joshlong.jukebox2.services.impl.ManagedFileServiceImpl">
+    <bean id="managedFileService" parent="baseService"
+          class="com.joshlong.jukebox2.services.impl.ManagedFileServiceImpl">
         <property name="webMediaFullUrl" value="/managedFiles"/>
     </bean>
 
@@ -44,7 +46,8 @@
         </tx:attributes>
     </tx:advice>
 
-    <bean id="cacheStatisticsLogger" class="com.joshlong.jukebox2.services.impl.util.caching.CacheStatisticsLoggerAdvice">
+    <bean id="cacheStatisticsLogger"
+          class="com.joshlong.jukebox2.services.impl.util.caching.CacheStatisticsLoggerAdvice">
         <property name="sessionFactory" ref="hibernateSessionFactory"/>
         <property name="enabled" value="false"/>
     </bean>
@@ -110,7 +113,7 @@
         <property name="configuration" value="classpath:org/jbpm/default.jbpm.cfg.xml"/>
         <property name="processDefinitionsResources">
             <list>
-             <!--   <value>classpath:/workflow/processes/authorize-promoter-payment-profile.xml</value>
+                <!--   <value>classpath:/workflow/processes/authorize-promoter-payment-profile.xml</value>
                 <value>classpath:/workflow/processes/verify-customer-email.xml</value>
                 <value>classpath:/workflow/processes/verify-siteAdmin-email.xml</value>
                 <value>classpath:/workflow/processes/verify-promoter-email.xml</value>

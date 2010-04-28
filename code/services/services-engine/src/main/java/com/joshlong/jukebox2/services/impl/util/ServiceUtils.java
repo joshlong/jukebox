@@ -5,13 +5,11 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.orm.hibernate3.HibernateTemplate;
-import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
@@ -19,7 +17,7 @@ import java.util.List;
 public class ServiceUtils implements InitializingBean {
     private HibernateTemplate hibernateTemplate;
 
-    @Required 
+    @Required
     public void setHibernateTemplate(final HibernateTemplate hibernateTemplate) {
         this.hibernateTemplate = hibernateTemplate;
     }
@@ -33,7 +31,7 @@ public class ServiceUtils implements InitializingBean {
         return (T) hibernateTemplate.get(t, s);
     }
 
-    public  String generateBookmarkableFriendlyUrl(String urlToNormalizeForSeoPurposes) {
+    public String generateBookmarkableFriendlyUrl(String urlToNormalizeForSeoPurposes) {
         String urlLowerCasedAndTrimmed = StringUtils.defaultString(urlToNormalizeForSeoPurposes).toLowerCase().trim();
         StringBuilder arr = new StringBuilder();
 
@@ -80,7 +78,7 @@ public class ServiceUtils implements InitializingBean {
     }
 
     @SuppressWarnings("unchecked")
-    public  <T> T firstOrNull(Collection c) {
+    public <T> T firstOrNull(Collection c) {
         if ((c == null) || (c.size() == 0)) {
             return null;
         }

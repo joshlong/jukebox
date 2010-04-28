@@ -1,4 +1,5 @@
 package com.joshlong.jukebox2.services.impl;
+
 import com.joshlong.jukebox2.model.ManagedFile;
 import com.joshlong.jukebox2.model.StorageNode;
 import com.joshlong.jukebox2.services.ManagedFileService;
@@ -24,17 +25,15 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- *
  * This is code for handling the storage of files on the file system (presumably some sort of SAN mount or something).
  *
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
- *
  */
 public class ManagedFileServiceImpl extends BaseService implements ManagedFileService {
     private static String MANAGED_FILE_MNT_DIRECTORY = "managedFiles";
     private String assetPathMask = "%010d/%010d.%s";
     private String webMediaFullUrl;
- 
+
     @Autowired
     private HibernateTemplate hibernateTemplate;
     @Autowired
@@ -79,7 +78,8 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
         long rootFolderId = deriveFolderIdFor(lid);
         StorageNode storageNodeForManagedFile = getStorageNodeForManagedFile(mf.getId());
         String mountPrefix = storageNodeForManagedFile.getMountPrefix();
-        String pathString = String.format("/%s/%s/media/" + assetPathMask, mapPrefixToWeb(mf.getMountPrefix()), mountPrefix, rootFolderId, lid, mf.getExtension());
+        String pathString = String.format("/%s/%s/media/" + assetPathMask, mapPrefixToWeb(mf.getMountPrefix()),
+                                          mountPrefix, rootFolderId, lid, mf.getExtension());
 
         return String.format("%s%s", StringUtils.defaultString(host), pathString);
     }
@@ -95,7 +95,8 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
         StorageNode sn = getStorageNodeForManagedFile(mf.getId());
         String mountPrefix = sn.getMountPrefix();
 
-        return String.format("%s/%s/media/" + assetPathMask, mapPrefixToFileSystem(mf.getMountPrefix()), mountPrefix, rootFolderId, lid, mf.getExtension());
+        return String.format("%s/%s/media/" + assetPathMask, mapPrefixToFileSystem(mf.getMountPrefix()), mountPrefix,
+                             rootFolderId, lid, mf.getExtension());
     }
 
     /*public String getPathForUploadBundleFile(long uploadBundleId, String fileName) {
@@ -111,6 +112,7 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
 
         }
     */
+
     public StorageNode createStorageNode(String mountPrefix, double totalByteCapacity) {
         StorageNode existingStorageNode = getStorageNodeByMountPrefix(mountPrefix);
 
@@ -180,40 +182,42 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
 
     public void setManagedFileReadyYN(final long mfid, final boolean yesOrNo) {
         hibernateTemplate.execute(new HibernateCallback() {
-                public Object doInHibernate(Session session)
+            public Object doInHibernate(Session session)
                     throws HibernateException, SQLException {
-                    ManagedFile managedFile = getManagedFileById(mfid);
-                    boolean readyAlready = managedFile.isReady();
-                    managedFile.setReady(yesOrNo);
+                ManagedFile managedFile = getManagedFileById(mfid);
+                boolean readyAlready = managedFile.isReady();
+                managedFile.setReady(yesOrNo);
 
-                    hibernateTemplate.saveOrUpdate(managedFile);
+                hibernateTemplate.saveOrUpdate(managedFile);
 
-                    StorageNode storageNode = managedFile.getStorageNode();
+                StorageNode storageNode = managedFile.getStorageNode();
 
-                    if (storageNode == null) {
-                        throw new RuntimeException(String.format("You cant mark a managed file as ready without it " + "being assigned to a storage node! Managed File: %s", managedFile.getId()));
-                    }
-
-                    // ie, the bytes are ALREADY there
-                    // on the storage node, now account for it in
-                    // in the book keeping
-                    if (yesOrNo) {
-                        storageNode.setBytesUsed(storageNode.getBytesUsed() + managedFile.getByteSize());
-                    }
-
-                    // if the managed file was previously marked as ready (and
-                    // thus, we would
-                    // have allocated space for it), then we deduct that
-                    // allotment
-                    if (!yesOrNo && readyAlready) {
-                        storageNode.setBytesUsed(storageNode.getBytesUsed() + managedFile.getByteSize());
-                    }
-
-                    hibernateTemplate.saveOrUpdate(storageNode);
-
-                    return managedFile;
+                if (storageNode == null) {
+                    throw new RuntimeException(String.format(
+                            "You cant mark a managed file as ready without it " + "being assigned to a storage node! Managed File: %s",
+                            managedFile.getId()));
                 }
-            });
+
+                // ie, the bytes are ALREADY there
+                // on the storage node, now account for it in
+                // in the book keeping
+                if (yesOrNo) {
+                    storageNode.setBytesUsed(storageNode.getBytesUsed() + managedFile.getByteSize());
+                }
+
+                // if the managed file was previously marked as ready (and
+                // thus, we would
+                // have allocated space for it), then we deduct that
+                // allotment
+                if (!yesOrNo && readyAlready) {
+                    storageNode.setBytesUsed(storageNode.getBytesUsed() + managedFile.getByteSize());
+                }
+
+                hibernateTemplate.saveOrUpdate(storageNode);
+
+                return managedFile;
+            }
+        });
     }
 
     public void setStorageNodeReady(long storageNodeId, boolean readyYesOrNo) {
@@ -234,7 +238,11 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
         return mf.isReady();
     }
 
-    public ManagedFile createManagedFile(String originalFileName, String extension, ManagedFileMountPrefix prefix, double byteSize, int priority) {
+    public ManagedFile createManagedFile(String originalFileName,
+                                         String extension,
+                                         ManagedFileMountPrefix prefix,
+                                         double byteSize,
+                                         int priority) {
         ManagedFile managedFile = new ManagedFile();
         managedFile.setByteSize(byteSize);
         managedFile.setExtension(StringUtils.defaultString(extension).toLowerCase());
@@ -246,7 +254,8 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
 
         if (null == prefix) {
             mfPrefix = ManagedFileMountPrefix.DEFAULT.name().toLowerCase(); // prefix.name().toLowerCase()
-        } else {
+        }
+        else {
             mfPrefix = prefix.name().toLowerCase();
         }
 
@@ -268,7 +277,8 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
     }
 
     public StorageNode getStorageNodeByMountPrefix(String mountPrefix) {
-        List<StorageNode> nodes = hibernateTemplate.findByNamedParam("select sn FROM StorageNode sn WHERE sn.mountPrefix=:mp", "mp", StringUtils.defaultString(mountPrefix));
+        List<StorageNode> nodes = hibernateTemplate.findByNamedParam(
+                "select sn FROM StorageNode sn WHERE sn.mountPrefix=:mp", "mp", StringUtils.defaultString(mountPrefix));
 
         if ((nodes != null) && (nodes.size() > 0)) {
             return nodes.iterator().next();
@@ -283,6 +293,7 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
 
     // todo finish this
     // todo should this also spin of some sort of process?
+
     public boolean moveManagedFileToStorageNode(long managedFileId, long storageNodeId) {
         ManagedFile managedFile = getManagedFileById(managedFileId);
 
@@ -321,7 +332,9 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
     }
 
     public Collection<StorageNode> getStorageNodesByPriority(int priority) {
-        return hibernateTemplate.findByNamedParam("select sn from StorageNode sn where sn.priority=:pri AND sn.offline = false and sn.ready = true", "pri", priority);
+        return hibernateTemplate.findByNamedParam(
+                "select sn from StorageNode sn where sn.priority=:pri AND sn.offline = false and sn.ready = true",
+                "pri", priority);
     }
 
     public StorageNode getStorageNodeForManagedFile(long managedFileId) {
@@ -334,36 +347,37 @@ public class ManagedFileServiceImpl extends BaseService implements ManagedFileSe
         ArrayList<StorageNode> nodes = new ArrayList<StorageNode>();
         nodes.addAll(getAvailableStorageNodes());
         Collections.sort(nodes,
-            new Comparator<StorageNode>() {
-                public int compare(StorageNode storageNode, StorageNode storageNode1) {
-                    return storageNode.getPriority() - storageNode1.getPriority();
-                }
-            });
+                         new Comparator<StorageNode>() {
+                             public int compare(StorageNode storageNode, StorageNode storageNode1) {
+                                 return storageNode.getPriority() - storageNode1.getPriority();
+                             }
+                         });
 
         final int priority = mf.getPriority();
         StorageNode sn;
         sn = (StorageNode) CollectionUtils.find(nodes,
-                new Predicate() {
-                    public boolean evaluate(Object o) {
-                        StorageNode sn = (StorageNode) o;
+                                                new Predicate() {
+                                                    public boolean evaluate(Object o) {
+                                                        StorageNode sn = (StorageNode) o;
 
-                        return (sn.getPriority() == priority) && (sn.getBytesUsed() <= (.95 * sn.getTotalByteCapacity()));
-                    }
-                });
+                                                        return (sn.getPriority() == priority) && (sn.getBytesUsed() <= (.95 * sn.getTotalByteCapacity()));
+                                                    }
+                                                });
 
         if (sn == null) {
             sn = (StorageNode) CollectionUtils.find(nodes,
-                    new Predicate() {
-                        public boolean evaluate(Object o) {
-                            StorageNode sn = (StorageNode) o;
+                                                    new Predicate() {
+                                                        public boolean evaluate(Object o) {
+                                                            StorageNode sn = (StorageNode) o;
 
-                            return (sn.getPriority() != priority) && (sn.getBytesUsed() <= (.95 * sn.getTotalByteCapacity()));
-                        }
-                    });
+                                                            return (sn.getPriority() != priority) && (sn.getBytesUsed() <= (.95 * sn.getTotalByteCapacity()));
+                                                        }
+                                                    });
         }
 
         if (sn == null) {
-            throw new RuntimeException("Can't allocate disk storage! No space " + "for a managed file with priority " + mf.getPriority() + "on _ANY_ nodes!");
+            throw new RuntimeException(
+                    "Can't allocate disk storage! No space " + "for a managed file with priority " + mf.getPriority() + "on _ANY_ nodes!");
         }
 
         addManagedFileToStorageNode(managedFileId, sn.getId());

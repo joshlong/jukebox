@@ -5,7 +5,6 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
@@ -19,7 +18,11 @@ public class WorkDTO {
     public WorkDTO() {
     }
 
-    public WorkDTO(final long sequenceId, final String tableName, final String op, final String data, final boolean key) {
+    public WorkDTO(final long sequenceId,
+                   final String tableName,
+                   final String op,
+                   final String data,
+                   final boolean key) {
         this.sequenceId = sequenceId;
         this.tableName = tableName;
         this.op = op;

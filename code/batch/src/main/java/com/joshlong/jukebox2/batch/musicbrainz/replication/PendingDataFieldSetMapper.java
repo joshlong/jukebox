@@ -12,10 +12,10 @@ public class PendingDataFieldSetMapper implements FieldSetMapper<PendingDataDTO>
             return null;
         }
 
-        PendingDataDTO pendingDTO = new PendingDataDTO ();
+        PendingDataDTO pendingDTO = new PendingDataDTO();
         pendingDTO.setData(fieldSet.readString("Data"));
         pendingDTO.setSeqId(fieldSet.readInt("SeqId"));
-        pendingDTO.setKey(fieldSet.readBoolean("IsKey") );
+        pendingDTO.setKey(fieldSet.readBoolean("IsKey"));
 
         return pendingDTO;
     }

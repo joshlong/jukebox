@@ -60,8 +60,8 @@
                     <dependency>
                         <artifactId>postgresql</artifactId>
                         <groupId>postgresql</groupId>
-                       <version>8.3-603.jdbc3</version>
-                    </dependency>                
+                        <version>8.3-603.jdbc3</version>
+                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>

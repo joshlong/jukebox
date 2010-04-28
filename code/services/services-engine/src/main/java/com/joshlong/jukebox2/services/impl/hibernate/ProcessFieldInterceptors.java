@@ -11,43 +11,45 @@ import java.util.Arrays;
 import java.util.Date;
 
 /**
- * @author jlong
- *         <p/>
- *         Code designed to guarantee that certain fields are always
- *         updated/saved/etc
+ * @author jlong Code designed to guarantee that certain fields are always updated/saved/etc
  */
 public class ProcessFieldInterceptors extends EmptyInterceptor implements ApplicationContextAware {
 
-	// http://java.dzone.com/articles/using-a-hibernate-interceptor-*/
+    // http://java.dzone.com/articles/using-a-hibernate-interceptor-*/
 
-	@Override
-	public boolean onFlushDirty(Object o, Serializable serializable, Object[] objects, Object[] objects1, String[] strings, Type[] types) {
-		setValue(objects, strings, "dateModified", new Date());
-		return true;
-	}
+    @Override
+    public boolean onFlushDirty(Object o,
+                                Serializable serializable,
+                                Object[] objects,
+                                Object[] objects1,
+                                String[] strings,
+                                Type[] types) {
+        setValue(objects, strings, "dateModified", new Date());
+        return true;
+    }
 
-	@Override
-	public boolean onSave(Object o, Serializable serializable, Object[] objects, String[] strings, Type[] types) {
-		Date now = new Date();
-		setValue(objects, strings, "dateCreated", now);
-		setValue(objects, strings, "dateModified", now);
-		return true;
-	}
+    @Override
+    public boolean onSave(Object o, Serializable serializable, Object[] objects, String[] strings, Type[] types) {
+        Date now = new Date();
+        setValue(objects, strings, "dateCreated", now);
+        setValue(objects, strings, "dateModified", now);
+        return true;
+    }
 
-	// btw, its worth mentioning that Intellij has the industry wide best
-	// support for groovy
+    // btw, its worth mentioning that Intellij has the industry wide best
+    // support for groovy
 
-	private void setValue(Object[] state, String[] props, String propertyToSet, Object val) {
-		int indxOfPropertyNameInPropertyNamesArr = Arrays.asList(props).indexOf(propertyToSet);
-		if (indxOfPropertyNameInPropertyNamesArr >= 0) {
-			state[indxOfPropertyNameInPropertyNamesArr] = val;
-		}
+    private void setValue(Object[] state, String[] props, String propertyToSet, Object val) {
+        int indxOfPropertyNameInPropertyNamesArr = Arrays.asList(props).indexOf(propertyToSet);
+        if (indxOfPropertyNameInPropertyNamesArr >= 0) {
+            state[indxOfPropertyNameInPropertyNamesArr] = val;
+        }
 
-	}
+    }
 
-	private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 }

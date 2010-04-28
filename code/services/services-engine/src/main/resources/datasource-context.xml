@@ -23,7 +23,6 @@
     <amq:topic id="bpmsPing" physicalName="jukebox2.bpms.pings"/>
 
 
-
     <bean id="musicbrainzJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="musicbrainzDataSource"/>
     </bean>
@@ -32,7 +31,7 @@
     <bean id="jukeboxJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
         <property name="dataSource" ref="jukeboxDataSource"/>
     </bean>
-    
+
     <bean id="jmsConnectionFactory"
           class="bitronix.tm.resource.jms.PoolingConnectionFactory"
           init-method="init"
@@ -70,7 +69,7 @@
         </property>
     </bean>
 
-     <bean id="musicbrainzDataSource"
+    <bean id="musicbrainzDataSource"
           class="bitronix.tm.resource.jdbc.PoolingDataSource"
           init-method="init"
           destroy-method="close"
@@ -92,15 +91,11 @@
     <bean id="bitronixTransactionManager" factory-method="getTransactionManager"
           class="bitronix.tm.TransactionManagerServices" depends-on="btmConfig" destroy-method="shutdown"/>
 
-    <bean id="transactionManager"
-          class="org.springframework.transaction.jta.JtaTransactionManager"
-          p:allowCustomIsolationLevels="true"
-          p:transactionManager-ref="bitronixTransactionManager"
+    <bean id="transactionManager" class="org.springframework.transaction.jta.JtaTransactionManager"
+          p:allowCustomIsolationLevels="true" p:transactionManager-ref="bitronixTransactionManager"
           p:userTransaction-ref="bitronixTransactionManager"/>
 
-
-    <bean id="btmConfig" destroy-method="shutdown"
-          factory-method="getConfiguration" class="bitronix.tm.TransactionManagerServices" p:serverId="spring-btm-sender"
-            />
+    <bean id="btmConfig" destroy-method="shutdown" factory-method="getConfiguration"
+          class="bitronix.tm.TransactionManagerServices" p:serverId="spring-btm-sender"/>
 
 </beans>

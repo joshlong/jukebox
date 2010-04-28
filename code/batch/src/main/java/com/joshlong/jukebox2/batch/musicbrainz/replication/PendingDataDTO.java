@@ -9,7 +9,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 public class PendingDataDTO {
     private int seqId;
-    private boolean key; private String data;
+    private boolean key;
+    private String data;
 
     public PendingDataDTO() {
     }

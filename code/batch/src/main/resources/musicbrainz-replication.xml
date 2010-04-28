@@ -85,7 +85,7 @@
             </beans:value>
         </beans:property>
     </beans:bean>
-    
+
     <beans:bean id="workToBeDoneReader" class="org.springframework.batch.item.database.JdbcCursorItemReader"
                 scope="step">
         <beans:property name="dataSource" ref="musicbrainzDataSource"/>
@@ -138,7 +138,6 @@
 
     <beans:bean id="pendingWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter" scope="step"
                 p:dataSource-ref="musicbrainzDataSource">
-
         <beans:property name="itemSqlParameterSourceProvider">
             <beans:bean class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider"/>
         </beans:property>

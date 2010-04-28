@@ -2,14 +2,13 @@ package com.joshlong.jukebox2.services.impl.util;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 public final class Bytes {
-    private static final Pattern valuePattern = Pattern.compile("([0-9]+([\\\\.,][0-9]+)?)\\\\s*(|K|M|G|T)B?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern valuePattern = Pattern.compile("([0-9]+([\\\\.,][0-9]+)?)\\\\s*(|K|M|G|T)B?",
+                                                                Pattern.CASE_INSENSITIVE);
     public static Bytes MAX = bytes(Long.MAX_VALUE);
     protected long value;
 
@@ -88,21 +87,28 @@ public final class Bytes {
 
                 if (units.equalsIgnoreCase("")) {
                     return bytes(value);
-                } else if (units.equalsIgnoreCase("K")) {
+                }
+                else if (units.equalsIgnoreCase("K")) {
                     return kilobytes(value);
-                } else if (units.equalsIgnoreCase("M")) {
+                }
+                else if (units.equalsIgnoreCase("M")) {
                     return megabytes(value);
-                } else if (units.equalsIgnoreCase("G")) {
+                }
+                else if (units.equalsIgnoreCase("G")) {
                     return gigabytes(value);
-                } else if (units.equalsIgnoreCase("T")) {
+                }
+                else if (units.equalsIgnoreCase("T")) {
                     return terabytes(value);
-                } else {
+                }
+                else {
                     throw new RuntimeException("Units not recognized: " + string);
                 }
-            } catch (ParseException e) {
+            }
+            catch (ParseException e) {
                 throw new RuntimeException("Unable to parse numeric part: " + string, e);
             }
-        } else {
+        }
+        else {
             throw new RuntimeException("Unable to parse bytes: " + string);
         }
     }

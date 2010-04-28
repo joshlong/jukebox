@@ -34,7 +34,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.*;
 
-
 /**
  * Integration point with our workflow engine -- should be able to query worklists, kick off new * process instances,
  * all from here *
@@ -63,98 +62,107 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
         return taskInstanceIds;
     }
 
-    private Collection<Long> _processInstances(final String processDefinitionName, final Map<String, Object> criteria, final boolean started, final boolean stopped, final boolean suspended) {
+    private Collection<Long> _processInstances(final String processDefinitionName,
+                                               final Map<String, Object> criteria,
+                                               final boolean started,
+                                               final boolean stopped,
+                                               final boolean suspended) {
         List ids = hibernateTemplate.executeFind(new HibernateCallback<List<Long>>() {
-                    public List<Long> doInHibernate(Session session)
-                        throws HibernateException, SQLException {
-                        List<Long> ids = new ArrayList<Long>();
-                        boolean predicateOnPdName = !StringUtils.isEmpty(processDefinitionName);
-                        StringBuffer stringBuffer = new StringBuffer("select pi.id from  org.jbpm.graph.exe.ProcessInstance as pi where ");
-                        Collection<String> predicates = new ArrayList<String>();
+            public List<Long> doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                List<Long> ids = new ArrayList<Long>();
+                boolean predicateOnPdName = !StringUtils.isEmpty(processDefinitionName);
+                StringBuffer stringBuffer = new StringBuffer(
+                        "select pi.id from  org.jbpm.graph.exe.ProcessInstance as pi where ");
+                Collection<String> predicates = new ArrayList<String>();
 
-                        if (predicateOnPdName) {
-                            predicates.add(" pi.processDefinition.name = :pdName ");
+                if (predicateOnPdName) {
+                    predicates.add(" pi.processDefinition.name = :pdName ");
+                }
+
+                predicates.add(String.format("pi.start is %s null", started ? "not" : StringUtils.EMPTY));
+                predicates.add(String.format("pi.end is %s null", stopped ? "not" : StringUtils.EMPTY));
+                predicates.add(String.format("pi.isSuspended = %s", suspended ? "TRUE" : "FALSE"));
+
+                stringBuffer.append(StringUtils.join(predicates.iterator(), " AND "));
+
+                Map<String, Object> namedParamsAndVals = new HashMap<String, Object>();
+
+                String hql = stringBuffer.toString();
+
+                if ((criteria != null) && (criteria.keySet().size() > 0)) {
+                    hql += " and ";
+
+                    String q1 = " ( pi.rootToken.id IN ( select li.token.id from LongInstance li WHERE li.value = %s AND li.name =  %s ))  ";
+                    String q2 = "  ( pi.rootToken.id IN ( select si.token.id from StringInstance si WHERE si.value = %s   AND si.name =  %s )) ";
+
+                    Collection<String> crits = new ArrayList<String>();
+                    int ctr = 0;
+
+                    for (String key : criteria.keySet()) {
+                        Object val = criteria.get(key);
+                        String nameParam = "name" + ctr;
+                        String valParam = "value" + ctr;
+                        namedParamsAndVals.put(nameParam, key);
+                        namedParamsAndVals.put(valParam, val);
+
+                        String whichQuery = null;
+
+                        if (val instanceof Number) {
+                            whichQuery = q1;
                         }
 
-                        predicates.add(String.format("pi.start is %s null", started ? "not" : StringUtils.EMPTY));
-                        predicates.add(String.format("pi.end is %s null", stopped ? "not" : StringUtils.EMPTY));
-                        predicates.add(String.format("pi.isSuspended = %s", suspended ? "TRUE" : "FALSE"));
-
-                        stringBuffer.append(StringUtils.join(predicates.iterator(), " AND "));
-
-                        Map<String, Object> namedParamsAndVals = new HashMap<String, Object>();
-
-                        String hql = stringBuffer.toString();
-
-                        if ((criteria != null) && (criteria.keySet().size() > 0)) {
-                            hql += " and ";
-
-                            String q1 = " ( pi.rootToken.id IN ( select li.token.id from LongInstance li WHERE li.value = %s AND li.name =  %s ))  ";
-                            String q2 = "  ( pi.rootToken.id IN ( select si.token.id from StringInstance si WHERE si.value = %s   AND si.name =  %s )) ";
-
-                            Collection<String> crits = new ArrayList<String>();
-                            int ctr = 0;
-
-                            for (String key : criteria.keySet()) {
-                                Object val = criteria.get(key);
-                                String nameParam = "name" + ctr;
-                                String valParam = "value" + ctr;
-                                namedParamsAndVals.put(nameParam, key);
-                                namedParamsAndVals.put(valParam, val);
-
-                                String whichQuery = null;
-
-                                if (val instanceof Number) {
-                                    whichQuery = q1;
-                                }
-
-                                if (val instanceof String) {
-                                    whichQuery = q2;
-                                }
-
-                                crits.add(String.format(whichQuery, ":" + valParam, ":" + nameParam));
-
-                                ctr += 1;
-                            }
-
-                            hql += StringUtils.join(crits.iterator(), " AND ");
+                        if (val instanceof String) {
+                            whichQuery = q2;
                         }
 
-                        ArrayList<String> keys = new ArrayList<String>();
-                        ArrayList<Object> vals = new ArrayList<Object>();
+                        crits.add(String.format(whichQuery, ":" + valParam, ":" + nameParam));
 
-                        for (String key : namedParamsAndVals.keySet()) {
-                            Object val = namedParamsAndVals.get(key);
-
-                            if (val instanceof Number && !(val instanceof Double) && !(val instanceof Float)) {
-                                vals.add(((Number) val).longValue());
-                            } else if (val instanceof Double || val instanceof Float) {
-                                vals.add(((Number) val).doubleValue());
-                            } else {
-                                vals.add(val);
-                            }
-
-                            keys.add(key);
-                        }
-
-                        if (predicateOnPdName) {
-                            keys.add("pdName");
-                            vals.add(processDefinitionName);
-                        }
-
-                        String[] paramNames = keys.toArray(new String[keys.size()]);
-                        Object[] paramVals = vals.toArray();
-
-                        ids = hibernateTemplate.findByNamedParam(hql, paramNames, paramVals);
-
-                        return ids;
+                        ctr += 1;
                     }
-                });
+
+                    hql += StringUtils.join(crits.iterator(), " AND ");
+                }
+
+                ArrayList<String> keys = new ArrayList<String>();
+                ArrayList<Object> vals = new ArrayList<Object>();
+
+                for (String key : namedParamsAndVals.keySet()) {
+                    Object val = namedParamsAndVals.get(key);
+
+                    if (val instanceof Number && !(val instanceof Double) && !(val instanceof Float)) {
+                        vals.add(((Number) val).longValue());
+                    }
+                    else if (val instanceof Double || val instanceof Float) {
+                        vals.add(((Number) val).doubleValue());
+                    }
+                    else {
+                        vals.add(val);
+                    }
+
+                    keys.add(key);
+                }
+
+                if (predicateOnPdName) {
+                    keys.add("pdName");
+                    vals.add(processDefinitionName);
+                }
+
+                String[] paramNames = keys.toArray(new String[keys.size()]);
+                Object[] paramVals = vals.toArray();
+
+                ids = hibernateTemplate.findByNamedParam(hql, paramNames, paramVals);
+
+                return ids;
+            }
+        });
 
         return ids; //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public Collection<Long> getOpenTaskInstancesByProcessInstanceAndActorAndCriteria(final long processInstanceId, final String actor, final Map<String, Object> c1) {
+    public Collection<Long> getOpenTaskInstancesByProcessInstanceAndActorAndCriteria(final long processInstanceId,
+                                                                                     final String actor,
+                                                                                     final Map<String, Object> c1) {
         final Map<String, Object> criteria = new HashMap<String, Object>();
 
         if (c1 != null) {
@@ -162,82 +170,85 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
         } // this way, its safe to assume the variable will never be null
 
         List tis = hibernateTemplate.executeFind(new HibernateCallback() {
-                    public Object doInHibernate(Session session)
-                        throws HibernateException, SQLException {
-                        Collection<Long> tasks = new ArrayList<Long>();
+            public Object doInHibernate(Session session)
+                    throws HibernateException, SQLException {
+                Collection<Long> tasks = new ArrayList<Long>();
 
-                        //                TaskInstance taskInstance ;taskInstance.getToken().getProcessInstance().getId()
-                        String hql = "SELECT ti.id FROM TaskInstance ti WHERE ti.start IS NULL and ti.actorId=  :actor and ti.isOpen = true and ti.isSuspended = false   ";
+                //                TaskInstance taskInstance ;taskInstance.getToken().getProcessInstance().getId()
+                String hql = "SELECT ti.id FROM TaskInstance ti WHERE ti.start IS NULL and ti.actorId=  :actor and ti.isOpen = true and ti.isSuspended = false   ";
 
-                        Map<String, Object> namedParamsAndVals = new HashMap<String, Object>();
-                        namedParamsAndVals.put("actor", actor);
+                Map<String, Object> namedParamsAndVals = new HashMap<String, Object>();
+                namedParamsAndVals.put("actor", actor);
 
-                        if (processInstanceId != -1) {
-                            hql += " and ti.token.processInstance.id= :pid ";
-                            namedParamsAndVals.put("pid", processInstanceId);
+                if (processInstanceId != -1) {
+                    hql += " and ti.token.processInstance.id= :pid ";
+                    namedParamsAndVals.put("pid", processInstanceId);
+                }
+
+                if ((criteria != null) && (criteria.keySet().size() > 0)) {
+                    hql += " and ";
+
+                    String q1 = "  ti.token.id IN ( select li.token.id from LongInstance li WHERE li.value = %s AND li.name =  %s )  ";
+                    String q2 = " ti.token.id IN ( select si.token.id from StringInstance si WHERE si.value = '%s' AND si.name =  %s ) ";
+                    Collection<String> crits = new ArrayList<String>();
+                    int ctr = 0;
+
+                    for (String key : criteria.keySet()) {
+                        Object val = criteria.get(key);
+                        String nameParam = "name" + ctr;
+                        String valParam = "value" + ctr;
+                        namedParamsAndVals.put(nameParam, key);
+                        namedParamsAndVals.put(valParam, val);
+
+                        String whichQuery = null;
+
+                        if (val instanceof Number) {
+                            whichQuery = q1;
                         }
 
-                        if ((criteria != null) && (criteria.keySet().size() > 0)) {
-                            hql += " and ";
-
-                            String q1 = "  ti.token.id IN ( select li.token.id from LongInstance li WHERE li.value = %s AND li.name =  %s )  ";
-                            String q2 = " ti.token.id IN ( select si.token.id from StringInstance si WHERE si.value = '%s' AND si.name =  %s ) ";
-                            Collection<String> crits = new ArrayList<String>();
-                            int ctr = 0;
-
-                            for (String key : criteria.keySet()) {
-                                Object val = criteria.get(key);
-                                String nameParam = "name" + ctr;
-                                String valParam = "value" + ctr;
-                                namedParamsAndVals.put(nameParam, key);
-                                namedParamsAndVals.put(valParam, val);
-
-                                String whichQuery = null;
-
-                                if (val instanceof Number) {
-                                    whichQuery = q1;
-                                }
-
-                                if (val instanceof String) {
-                                    whichQuery = q2;
-                                }
-
-                                crits.add(String.format(whichQuery, ":" + valParam, ":" + nameParam));
-                                ctr += 1;
-                            }
-
-                            hql += StringUtils.join(crits.iterator(), " AND ");
+                        if (val instanceof String) {
+                            whichQuery = q2;
                         }
 
-                        ArrayList<String> keys = new ArrayList<String>();
-                        ArrayList<Object> vals = new ArrayList<Object>();
-
-                        for (String key : namedParamsAndVals.keySet()) {
-                            Object val = namedParamsAndVals.get(key);
-
-                            if (val instanceof Number && !(val instanceof Double) && !(val instanceof Float)) {
-                                vals.add(((Number) val).longValue());
-                            } else if (val instanceof Double || val instanceof Float) {
-                                vals.add(((Number) val).doubleValue());
-                            } else {
-                                vals.add(val);
-                            }
-
-                            keys.add(key);
-                        }
-
-                        String[] paramNames = keys.toArray(new String[keys.size()]);
-                        Object[] paramVals = vals.toArray();
-
-                        tasks = hibernateTemplate.findByNamedParam(hql, paramNames, paramVals);
-
-                        return tasks;
+                        crits.add(String.format(whichQuery, ":" + valParam, ":" + nameParam));
+                        ctr += 1;
                     }
-                });
+
+                    hql += StringUtils.join(crits.iterator(), " AND ");
+                }
+
+                ArrayList<String> keys = new ArrayList<String>();
+                ArrayList<Object> vals = new ArrayList<Object>();
+
+                for (String key : namedParamsAndVals.keySet()) {
+                    Object val = namedParamsAndVals.get(key);
+
+                    if (val instanceof Number && !(val instanceof Double) && !(val instanceof Float)) {
+                        vals.add(((Number) val).longValue());
+                    }
+                    else if (val instanceof Double || val instanceof Float) {
+                        vals.add(((Number) val).doubleValue());
+                    }
+                    else {
+                        vals.add(val);
+                    }
+
+                    keys.add(key);
+                }
+
+                String[] paramNames = keys.toArray(new String[keys.size()]);
+                Object[] paramVals = vals.toArray();
+
+                tasks = hibernateTemplate.findByNamedParam(hql, paramNames, paramVals);
+
+                return tasks;
+            }
+        });
         return tis;
     }
 
-    public Collection<Long> getOpenTaskInstancesByActorAndCriteria(final String actor, final Map<String, Object> criteria) {
+    public Collection<Long> getOpenTaskInstancesByActorAndCriteria(final String actor,
+                                                                   final Map<String, Object> criteria) {
         return this.getOpenTaskInstancesByProcessInstanceAndActorAndCriteria(-1, actor, criteria);
     }
 
@@ -249,7 +260,8 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
         try {
             d = df.parse(date);
-        } catch (ParseException e) {
+        }
+        catch (ParseException e) {
             // ... nothing we can do
         }
 
@@ -276,7 +288,7 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
             return arrayOfLongs;
         }
 
-        return new long[] {  };
+        return new long[]{};
     }
 
     public static String serializeIdList(Long... ids) {
@@ -285,19 +297,19 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public long getProcessInstanceIdForTaskInstance(final long taskInstanceId) {
         return (Long) jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    TaskInstance ti = getTaskInstance(taskInstanceId);
-                    ProcessInstance pi = ti.getToken().getProcessInstance();
+                TaskInstance ti = getTaskInstance(taskInstanceId);
+                ProcessInstance pi = ti.getToken().getProcessInstance();
 
-                    return pi.getId();
-                }
-            });
+                return pi.getId();
+            }
+        });
     }
 
     public Collection<String> getActorsHavingOpenTaskInstances(String[] actors) {
         Collection<String> answer = (Collection<String>) hibernateTemplate.findByNamedParam(
-            " SELECT ti.actorId FROM TaskInstance ti WHERE ti.actorId IN( :tids )  and ti.isOpen = true and ti.start IS NULL and ti.isSuspended = false GROUP BY ti.actorId",
+                " SELECT ti.actorId FROM TaskInstance ti WHERE ti.actorId IN( :tids )  and ti.isOpen = true and ti.start IS NULL and ti.isSuspended = false GROUP BY ti.actorId",
                 "tids", actors);
 
         return answer;
@@ -314,34 +326,34 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public void startProcessInstance(final long processInstanceId) {
         jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    ProcessInstance processInstance = jbpmContext.getProcessInstance(processInstanceId);
+                ProcessInstance processInstance = jbpmContext.getProcessInstance(processInstanceId);
 
-                    if (!processInstance.isSuspended() && (processInstance.getStart() != null)) {
-                        return null; // no need
-                    }
-
-                    processInstance.resume();
-                    jbpmContext.save(processInstance);
-                    processInstance.signal();
-                    jbpmContext.save(processInstance);
-
-                    jmsTemplate.send(bpmsStartedPingDestination,
-                        new MessageCreator() {
-                            public Message createMessage(javax.jms.Session session)
-                                throws JMSException {
-                                MapMessage msg = session.createMapMessage();
-                                msg.setBoolean("started", true);
-                                msg.setLong("processInstanceId", processInstanceId);
-
-                                return msg;
-                            }
-                        });
-
-                    return null;
+                if (!processInstance.isSuspended() && (processInstance.getStart() != null)) {
+                    return null; // no need
                 }
-            });
+
+                processInstance.resume();
+                jbpmContext.save(processInstance);
+                processInstance.signal();
+                jbpmContext.save(processInstance);
+
+                jmsTemplate.send(bpmsStartedPingDestination,
+                                 new MessageCreator() {
+                                     public Message createMessage(javax.jms.Session session)
+                                             throws JMSException {
+                                         MapMessage msg = session.createMapMessage();
+                                         msg.setBoolean("started", true);
+                                         msg.setLong("processInstanceId", processInstanceId);
+
+                                         return msg;
+                                     }
+                                 });
+
+                return null;
+            }
+        });
     }
 
     public Date createSchedulableDateFromDate(Date date) {
@@ -359,7 +371,8 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public ProcessInstance scheduleProcessInstance(String flowName, Map<String, Object> vars, Date when) {
         Map<String, Object> vars2 = new HashMap<String, Object>();
-        vars2.put(WorkflowService.BPMS_PROCESS_INSTANCE_WELL_KNOWN_PROCESS_ATTRIBUTE_SCHEDULED_DATE, encodeDateForProcessAttribute(createSchedulableDateFromDate(when)));
+        vars2.put(WorkflowService.BPMS_PROCESS_INSTANCE_WELL_KNOWN_PROCESS_ATTRIBUTE_SCHEDULED_DATE,
+                  encodeDateForProcessAttribute(createSchedulableDateFromDate(when)));
         vars2.putAll(vars);
 
         return this.createProcessInstance(flowName, vars2);
@@ -377,15 +390,15 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public void endProcessInstance(final Long processInstanceId) {
         jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    ProcessInstance processInstance = jbpmContext.getProcessInstance(processInstanceId);
-                    processInstance.end();
-                    jbpmTemplate.saveProcessInstance(processInstance);
+                ProcessInstance processInstance = jbpmContext.getProcessInstance(processInstanceId);
+                processInstance.end();
+                jbpmTemplate.saveProcessInstance(processInstance);
 
-                    return processInstance;
-                }
-            });
+                return processInstance;
+            }
+        });
     }
 
     public void startScheduledProcessInstances(String pdName, Map<String, Object> vars, Date when) {
@@ -415,43 +428,46 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public ProcessInstance createProcessInstance(final String flowName, final Map<String, Object> vars) {
         return (ProcessInstance) jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    ProcessInstance processInstance = createNewProcessInstance(flowName);
-                    jbpmContext.save(processInstance);
+                ProcessInstance processInstance = createNewProcessInstance(flowName);
+                jbpmContext.save(processInstance);
 
-                    ContextInstance contextInstance = (ContextInstance) processInstance.getInstance(ContextInstance.class);
+                ContextInstance contextInstance = (ContextInstance) processInstance.getInstance(ContextInstance.class);
 
-                    if (null != vars) {
-                        for (String varName : vars.keySet()) {
-                            Object value = vars.get(varName);
-                            setProcessVariableFor(processInstance.getId(), varName, value);
-                        }
+                if (null != vars) {
+                    for (String varName : vars.keySet()) {
+                        Object value = vars.get(varName);
+                        setProcessVariableFor(processInstance.getId(), varName, value);
                     }
-
-                    jbpmContext.save(processInstance);
-                    processInstance.suspend();
-                    //processInstance.getRootToken().suspend();
-                    jbpmContext.save(processInstance);
-
-                    //  jbpmContext.save(processInstance.getRootToken());
-                    long procId = processInstance.getId();
-                    processInstance = jbpmContext.getProcessInstance(procId);
-                    jbpmContext.save(processInstance);
-
-                    return processInstance;
                 }
-            });
+
+                jbpmContext.save(processInstance);
+                processInstance.suspend();
+                //processInstance.getRootToken().suspend();
+                jbpmContext.save(processInstance);
+
+                //  jbpmContext.save(processInstance.getRootToken());
+                long procId = processInstance.getId();
+                processInstance = jbpmContext.getProcessInstance(procId);
+                jbpmContext.save(processInstance);
+
+                return processInstance;
+            }
+        });
     }
 
     public int countOpenTaskInstances() {
-        Number answer = (Number) hibernateTemplate.find(" SELECT COUNT(ti.id) FROM TaskInstance ti WHERE   ti.isOpen = true and ti.isSuspended = false    ").iterator().next();
+        Number answer = (Number) hibernateTemplate.find(
+                " SELECT COUNT(ti.id) FROM TaskInstance ti WHERE   ti.isOpen = true and ti.isSuspended = false    ").iterator().next();
 
         return answer.intValue();
     }
 
     public int countOpenTaskInstancesForActors(String[] actors) {
-        Number answer = (Number) hibernateTemplate.findByNamedParam(" SELECT COUNT(ti.id) FROM TaskInstance ti WHERE ti.actorId IN( :tids )  and ti.isOpen = true and ti.isSuspended = false", "tids",
+        Number answer = (Number) hibernateTemplate.findByNamedParam(
+                " SELECT COUNT(ti.id) FROM TaskInstance ti WHERE ti.actorId IN( :tids )  and ti.isOpen = true and ti.isSuspended = false",
+                "tids",
                 actors).iterator().next();
 
         return answer.intValue();
@@ -467,21 +483,21 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
         }
 
         Boolean answer = (Boolean) jbpmTemplate.execute(new JbpmCallback() {
-                    public Object doInJbpm(JbpmContext jbpmContext)
-                        throws JbpmException {
-                        TaskInstance taskInstance = getTaskInstance(taskInstanceId);
+            public Object doInJbpm(JbpmContext jbpmContext)
+                    throws JbpmException {
+                TaskInstance taskInstance = getTaskInstance(taskInstanceId);
 
-                        if (taskInstance != null) {
-                            if ((taskInstance.getStart() == null) && !taskInstance.isCancelled() && !taskInstance.hasEnded()) {
-                                taskInstance.start(actor);
+                if (taskInstance != null) {
+                    if ((taskInstance.getStart() == null) && !taskInstance.isCancelled() && !taskInstance.hasEnded()) {
+                        taskInstance.start(actor);
 
-                                return Boolean.TRUE;
-                            }
-                        }
-
-                        return Boolean.FALSE;
+                        return Boolean.TRUE;
                     }
-                });
+                }
+
+                return Boolean.FALSE;
+            }
+        });
 
         return answer;
     }
@@ -526,26 +542,28 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     protected TaskInstance getTaskInstance(final long tid) {
         return (TaskInstance) jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    try {
-                        return _taskInstance(jbpmContext.getSession(), jbpmContext, tid);
-                    } catch (Throwable throwable) {
-                        // getLoggingUtils().log(throwable);
-                    }
-
-                    return null;
+                try {
+                    return _taskInstance(jbpmContext.getSession(), jbpmContext, tid);
                 }
-            });
+                catch (Throwable throwable) {
+                    // getLoggingUtils().log(throwable);
+                }
+
+                return null;
+            }
+        });
     }
 
     private TaskInstance _taskInstance(Session session, JbpmContext ctx, long taskInstanceId)
-        throws Throwable {
+            throws Throwable {
         TaskInstance taskInstance = null;
 
         try {
             taskInstance = (TaskInstance) session.load(TaskInstance.class, taskInstanceId, LockMode.UPGRADE);
-        } catch (Throwable e) {
+        }
+        catch (Throwable e) {
             throw new JbpmException("couldn't get task instance '" + taskInstanceId + "'", e);
         }
 
@@ -555,15 +573,15 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
     public boolean unlockTaskInstance(final long taskInstanceId) {
         if (taskInstanceId != 0) {
             jbpmTemplate.execute(new JbpmCallback() {
-                    public Object doInJbpm(JbpmContext jbpmContext)
+                public Object doInJbpm(JbpmContext jbpmContext)
                         throws JbpmException {
-                        TaskInstance ti = getTaskInstance(taskInstanceId);
-                        ti.suspend();
-                        jbpmContext.save(ti);
+                    TaskInstance ti = getTaskInstance(taskInstanceId);
+                    ti.suspend();
+                    jbpmContext.save(ti);
 
-                        return null;
-                    }
-                });
+                    return null;
+                }
+            });
         }
 
         return true;
@@ -592,54 +610,56 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
         }
         return pi.getId();
     }*/
+
     public void completeTaskInstance(final long taskInstanceId) {
         if (taskInstanceId == 0) {
             return;
         }
 
         jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext jbpmContext)
+            public Object doInJbpm(JbpmContext jbpmContext)
                     throws JbpmException {
-                    final TaskInstance taskInstance = getTaskInstance(taskInstanceId);
+                final TaskInstance taskInstance = getTaskInstance(taskInstanceId);
 
-                    if ((taskInstance.getEnd() == null) && !taskInstance.hasEnded()) {
-                        taskInstance.end();
-                        jbpmContext.save(taskInstance);
-                        jmsTemplate.send(bpmsStartedPingDestination,
-                            new MessageCreator() {
-                                public Message createMessage(javax.jms.Session session)
-                                    throws JMSException {
-                                    MapMessage msg = session.createMapMessage();
-                                    msg.setLong("taskInstanceId", taskInstanceId);
-                                    msg.setString("actorId", taskInstance.getActorId());
-                                    msg.setLong("processInstanceId", getProcessInstanceIdForTaskInstance(taskInstanceId));
+                if ((taskInstance.getEnd() == null) && !taskInstance.hasEnded()) {
+                    taskInstance.end();
+                    jbpmContext.save(taskInstance);
+                    jmsTemplate.send(bpmsStartedPingDestination,
+                                     new MessageCreator() {
+                                         public Message createMessage(javax.jms.Session session)
+                                                 throws JMSException {
+                                             MapMessage msg = session.createMapMessage();
+                                             msg.setLong("taskInstanceId", taskInstanceId);
+                                             msg.setString("actorId", taskInstance.getActorId());
+                                             msg.setLong("processInstanceId", getProcessInstanceIdForTaskInstance(
+                                                     taskInstanceId));
 
-                                    return msg;
-                                }
-                            });
-                    }
-
-                    return null;
+                                             return msg;
+                                         }
+                                     });
                 }
-            });
+
+                return null;
+            }
+        });
     }
 
     public void setProcessVariableFor(final long processinstanceid, final String name, final Object val) {
         jbpmTemplate.execute(new JbpmCallback() {
-                public Object doInJbpm(JbpmContext context)
+            public Object doInJbpm(JbpmContext context)
                     throws JbpmException {
-                    final String fName = StringUtils.defaultString(name);
-                    boolean wasValNull = val == null;
-                    final String fVal = wasValNull ? StringUtils.EMPTY : val.toString();
+                final String fName = StringUtils.defaultString(name);
+                boolean wasValNull = val == null;
+                final String fVal = wasValNull ? StringUtils.EMPTY : val.toString();
 
-                    // getLoggingUtils().log(String.format("setting [%s]=[%s] ", fName, fVal, fName, !wasValNull ? "not " : ""));
-                    ProcessInstance processInstance = getProcessInstanceById(processinstanceid);
-                    processInstance.getContextInstance().setVariable(name, val);
-                    context.save(processInstance);
+                // getLoggingUtils().log(String.format("setting [%s]=[%s] ", fName, fVal, fName, !wasValNull ? "not " : ""));
+                ProcessInstance processInstance = getProcessInstanceById(processinstanceid);
+                processInstance.getContextInstance().setVariable(name, val);
+                context.save(processInstance);
 
-                    return null;
-                }
-            });
+                return null;
+            }
+        });
     }
 
     public void setProcessVariablesFor(long processInstanceId, Map<String, Object> vals) {
@@ -662,17 +682,17 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public Long getNextTaskInstanceByActorAndCriteria(final String actor, final Map<String, Object> vars) {
         Object result = jbpmTemplate.execute(new JbpmCallback() {
-                    public Object doInJbpm(JbpmContext jbpmContext)
-                        throws JbpmException {
-                        Collection<Long> tis = getOpenTaskInstancesByActorAndCriteria(actor, vars);
+            public Object doInJbpm(JbpmContext jbpmContext)
+                    throws JbpmException {
+                Collection<Long> tis = getOpenTaskInstancesByActorAndCriteria(actor, vars);
 
-                        if ((tis != null) && (tis.size() > 0)) {
-                            return tis.iterator().next();
-                        }
+                if ((tis != null) && (tis.size() > 0)) {
+                    return tis.iterator().next();
+                }
 
-                        return null;
-                    }
-                });
+                return null;
+            }
+        });
 
         if (null == result) {
             return null;
@@ -687,14 +707,14 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public Map<String, Object> getProcessVariablesFor(final long processInstanceId) {
         Map<String, Object> variableMap = (Map<String, Object>) jbpmTemplate.execute(new JbpmCallback() {
-                    public Object doInJbpm(JbpmContext jbpmContext)
-                        throws JbpmException {
-                        ProcessInstance pi = jbpmContext.getProcessInstance(processInstanceId);
-                        Map vars = pi.getContextInstance().getVariables();
+            public Object doInJbpm(JbpmContext jbpmContext)
+                    throws JbpmException {
+                ProcessInstance pi = jbpmContext.getProcessInstance(processInstanceId);
+                Map vars = pi.getContextInstance().getVariables();
 
-                        return vars;
-                    }
-                });
+                return vars;
+            }
+        });
 
         return variableMap;
     }
@@ -721,22 +741,23 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
 
     public ProcessInstance createNewProcessInstance(final String defS) {
         ProcessInstance inst = (ProcessInstance) jbpmTemplate.execute(new JbpmCallback() {
-                    public Object doInJbpm(JbpmContext ctx)
-                        throws JbpmException {
-                        ProcessDefinition def = ctx.getGraphSession().findLatestProcessDefinition(defS);
-                        ProcessInstance inst = def.createProcessInstance();
-                        inst.suspend();
-                        ctx.save(inst);
+            public Object doInJbpm(JbpmContext ctx)
+                    throws JbpmException {
+                ProcessDefinition def = ctx.getGraphSession().findLatestProcessDefinition(defS);
+                ProcessInstance inst = def.createProcessInstance();
+                inst.suspend();
+                ctx.save(inst);
 
-                        return inst;
-                    }
-                });
+                return inst;
+            }
+        });
 
         return inst;
     }
 
     public boolean isProcessInstanceScheduledFor(long processInstanceId, Date when) {
-        Object valueForSchedule = getVariableByProcessInstance(processInstanceId, BPMS_PROCESS_INSTANCE_WELL_KNOWN_PROCESS_ATTRIBUTE_SCHEDULED_DATE);
+        Object valueForSchedule = getVariableByProcessInstance(processInstanceId,
+                                                               BPMS_PROCESS_INSTANCE_WELL_KNOWN_PROCESS_ATTRIBUTE_SCHEDULED_DATE);
 
         if (valueForSchedule != null) {
             Date decodedDate = decodeDateFromProcessAttribute((String) valueForSchedule);
@@ -744,7 +765,7 @@ public class WorkflowServiceImpl extends BaseService implements WorkflowService,
             Date topOfHour = DateUtils.truncate(now, Calendar.HOUR_OF_DAY);
             Date endOfHour = DateUtils.add(topOfHour, Calendar.HOUR_OF_DAY, 1);
             Date halfHour = DateUtils.add(topOfHour, Calendar.MINUTE, 30);
-            Date[] viableDates = { now, topOfHour, endOfHour, halfHour };
+            Date[] viableDates = {now, topOfHour, endOfHour, halfHour};
 
             for (Date d : viableDates) {
                 if (d.equals(decodedDate)) {

@@ -8,10 +8,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 
 /**
- *
  * This should simply display statistical information about the cache after each run.
  *
- * @author <a href="mailto:josh@joshlong.com">Josh Long</a> 
+ * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
 public class CacheStatisticsLoggerAdvice implements InitializingBean {
     private static final Logger logger = Logger.getLogger(CacheStatisticsLoggerAdvice.class);
@@ -32,16 +31,17 @@ public class CacheStatisticsLoggerAdvice implements InitializingBean {
     }
 
     /**
-     * Inspects the method invocation parameters and finds any arguments of type
-     * long and then iterates through all entity classes and runs invalidate on
-     * them
+     * Inspects the method invocation parameters and finds any arguments of type long and then iterates through all
+     * entity classes and runs invalidate on them
      *
-     * @param methodInvocation     ProceedingJoinPoint the context for the current method as it is being invoked
-     * @return          an object (arbitrary)
+     * @param methodInvocation ProceedingJoinPoint the context for the current method as it is being invoked
+     *
+     * @return an object (arbitrary)
+     *
      * @throws Throwable if something (<em>anything</em>) should go wrong..
      */
     public Object logStatisticsAboutCache(ProceedingJoinPoint methodInvocation)
-        throws Throwable {
+            throws Throwable {
         // Method method = methodInvocation.getMethod();
         Object result = null;
 
@@ -55,13 +55,16 @@ public class CacheStatisticsLoggerAdvice implements InitializingBean {
 
             // now we read cache statistics
             for (String regionName : sessionFactory.getStatistics().getSecondLevelCacheRegionNames()) {
-                SecondLevelCacheStatistics stats = sessionFactory.getStatistics().getSecondLevelCacheStatistics(regionName);
+                SecondLevelCacheStatistics stats = sessionFactory.getStatistics().getSecondLevelCacheStatistics(
+                        regionName);
 
                 if (stats.getSizeInMemory() > 0) {
-                    logger.debug(String.format("regionName:%s, methodToString:%s, entries: %s", regionName, methodInvocation.toLongString(), stats.toString()));
+                    logger.debug(String.format("regionName:%s, methodToString:%s, entries: %s", regionName,
+                                               methodInvocation.toLongString(), stats.toString()));
                 }
             }
-        } catch (Throwable t) {
+        }
+        catch (Throwable t) {
             logger.debug(t);
         }
 

@@ -32,10 +32,10 @@
     </build>
 
     <dependencies>
-       
+
 
         <dependency>
-            <groupId>com.quietriot</groupId>
+            <groupId>com.joshlong.jukebox2</groupId>
             <artifactId>services-engine</artifactId>
             <version>${version}</version>
         </dependency>

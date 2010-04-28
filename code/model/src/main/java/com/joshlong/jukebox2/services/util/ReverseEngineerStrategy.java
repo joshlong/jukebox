@@ -11,8 +11,8 @@ import java.beans.Introspector;
 import java.util.List;
 
 /**
- * The schema for the various bits of music data 
- * 
+ * The schema for the various bits of music data
+ *
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
 public class ReverseEngineerStrategy extends DelegatingReverseEngineeringStrategy {
@@ -27,20 +27,27 @@ public class ReverseEngineerStrategy extends DelegatingReverseEngineeringStrateg
 
     private String fkToEntityNameHelper(String in) {
         String in2 = toUpperCamelCase(in);
-        if (Character.isUpperCase(in2.charAt(0)))
+        if (Character.isUpperCase(in2.charAt(0))) {
             in2 = (in2.charAt(0) + "").toLowerCase() + in2.substring(1);
+        }
         return in2;
     }
 
-    public String foreignKeyToEntityName(String keyname, TableIdentifier fromTable, List fromColumnNames, TableIdentifier referencedTable, List referencedColumnNames, boolean uniqueReference) {
+    public String foreignKeyToEntityName(String keyname,
+                                         TableIdentifier fromTable,
+                                         List fromColumnNames,
+                                         TableIdentifier referencedTable,
+                                         List referencedColumnNames,
+                                         boolean uniqueReference) {
         String propertyName = Introspector.decapitalize(StringHelper.unqualify(tableToClassName(referencedTable)));
 
         if (uniqueReference) {
             propertyName = ((Column) fromColumnNames.get(0)).getName();
             propertyName = Introspector.decapitalize(toUpperCamelCase(propertyName));
 
-            if (propertyName.endsWith("Id"))
+            if (propertyName.endsWith("Id")) {
                 propertyName = propertyName.substring(0, propertyName.length() - 2);
+            }
         }
 //        log("fromColumnNames: unique ref; keyName:%s, propertyName:%s, fromTable:%s, referencedTable:%s, referenced column:%s, from columns:%s", keyname, propertyName,
 //                fromTable.getName(), referencedTable.getName(), referencedColumnNames.toString(), fromColumnNames.toString());
@@ -53,10 +60,13 @@ public class ReverseEngineerStrategy extends DelegatingReverseEngineeringStrateg
                                              fromTable.getName() ,referencedTable.getName(), referencedColumnNames.toString(), fromColumnNames.toString());
                 */
                 //    propertyName = propertyName + "By" + toUpperCamelCase(columnName);
-                propertyName = fkToEntityNameHelper(toUpperCamelCase((columnName.toLowerCase().endsWith("_id") ? columnName.substring(0, columnName.length() - 3) : columnName)));//+ toUpperCamelCase(propertyName));
+                propertyName = fkToEntityNameHelper(toUpperCamelCase((columnName.toLowerCase().endsWith(
+                        "_id") ? columnName.substring(0,
+                                                      columnName.length() - 3) : columnName)));//+ toUpperCamelCase(propertyName));
 
                 //       System.out.println( "pn: "+ propertyName+ " from first case") ;
-            } else { // composite key or no columns at all safeguard
+            }
+            else { // composite key or no columns at all safeguard
 //                log("fromColumnNames:>1; keyName:%s, propertyName:%s, fromTable:%s, referencedTable:%s, referenced column:%s, from columns:%s",  keyname , propertyName ,
 //                                         fromTable.getName() ,referencedTable.getName(), referencedColumnNames.toString(), fromColumnNames.toString());
 
