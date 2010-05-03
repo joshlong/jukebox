@@ -12,6 +12,14 @@ import java.awt.image.Raster;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+/**
+ *
+ * 
+ * this implementation is very good - it comapres two images
+ * efficiently. It is not efficient if what you're looking for is a
+ * hash of an image, however.
+ *
+ */
 public class ImageCompare {
 
     protected BufferedImage img1 = null;
