@@ -24,7 +24,7 @@
     </properties>
     <modules>
         <module>services</module>
-        <module>batch</module>
+        <module>musicbrainz-replication-processor</module>
         <module>bus</module>
         <!--       <module>ftp-server</module>
         <module>utils</module>
