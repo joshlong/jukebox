@@ -36,8 +36,7 @@ import java.io.IOException;
 import java.util.concurrent.ScheduledFuture;
 
 /**
- * <code>FtpInboundSynchronizer</code> will keep a local directory in sync with a remote Ftp directory. It will NOT move
- * new files put into the local directory to the remote server.
+ * <code>FtpInboundSynchronizer</code> will keep a local directory in sync with a remote Ftp directory. It will NOT move new files put into the local directory to the remote server.
  *
  * @author Iwein Fuld
  */
@@ -92,12 +91,12 @@ public class FtpInboundSynchronizer implements InitializingBean, Lifecycle {
     private void synchronize() {
         try {
             FTPClient client = this.clientPool.getClient();
-            Assert
-                    .state(
-                            client != null,
-                            FTPClientPool.class.getSimpleName()
-                            + " returned 'null' client this most likely a bug in the pool implementation.");
+            Assert.state( client != null,
+                  FTPClientPool.class.getSimpleName() + " returned 'null' client this most likely a bug in the pool implementation.");
             FTPFile[] fileList = client.listFiles();
+            if (fileList == null) {
+                return;
+            }
             try {
                 for (FTPFile ftpFile : fileList) {
                     /*
@@ -111,9 +110,7 @@ public class FtpInboundSynchronizer implements InitializingBean, Lifecycle {
                 }
             }
             finally {
-                if (client != null) {
-                    this.clientPool.releaseClient(client);
-                }
+                this.clientPool.releaseClient(client);
             }
         }
         catch (IOException e) {

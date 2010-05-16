@@ -88,9 +88,7 @@ public class ReplicationProcessor {
                     "UPDATE replication_control SET current_schema_sequence =?, current_replication_sequence =?, last_replication_date=?",
                     schemaSeq, replicationSeq, timestamp);
 
-        }
-
-        if (!canAndShouldProceed) {
+        } else   {
             System.out.println(String.format(
                     "Did not proceed because the replication bundle %s is older than the currently applied replication bundle",
                     bundleKey));

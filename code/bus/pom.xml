@@ -55,6 +55,11 @@
             <version>1.0-SNAPSHOT</version>
             <artifactId>services-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.joshlong.jukebox2</groupId>
+            <version>1.0-SNAPSHOT</version>
+            <artifactId>batch</artifactId>
+        </dependency>
 
     </dependencies>
     <build>

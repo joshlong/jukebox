@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Python" name="Python">
+      <configuration sdkName="Python 2.6.4" />
+    </facet>
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -87,6 +95,7 @@
     <orderEntry type="library" exported="" name="Maven: backport-util-concurrent:backport-util-concurrent:1.1_01" level="project" />
     <orderEntry type="library" exported="" name="Maven: net.sf.jsr107cache:jsr107cache:1.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.aspectj:aspectjweaver:1.6.5" level="project" />
+    <orderEntry type="library" name="Python 2.6.4 interpreter library" level="application" />
   </component>
 </module>
 
