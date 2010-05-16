@@ -25,7 +25,7 @@
     <modules>
         <module>services</module>
         <module>musicbrainz-replication-processor</module>
-        <module>bus</module>
+         
         <!--       <module>ftp-server</module>
         <module>utils</module>
 
