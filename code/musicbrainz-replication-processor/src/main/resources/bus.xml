@@ -32,13 +32,15 @@
     <import resource="musicbrainz-replication.xml" />
 
 
-    <bean id="newReplicationUpdateMessageSource" class="com.joshlong.jukebox2.batch.musicbrainz.replication.bus.NewReplicationUpdateMessageSource">
+    <bean id="newReplicationUpdateMessageSource" class="com.joshlong.jukebox2.musicbrainz.replication.bus.NewReplicationUpdateMessageSource">
         <property name="findNextReplicationSequenceSQL" value="SELECT current_replication_sequence FROM replication_control"/>
         <property name="replicationBaseUri" value="${musicbrainz.http.url}"/>
     </bean>
 
+    <bean id="inboundReplicationUpdateProcessor" class="com.joshlong.jukebox2.musicbrainz.replication.bus.InboundReplicationUpdateProcessor" />
+
     <integration:channel id="inboundReplicationUpdates"/>
     <integration:inbound-channel-adapter ref="newReplicationUpdateMessageSource" channel="inboundReplicationUpdates"/>
-    <integration:service-activator input-channel="inboundReplicationUpdates" ref="" />
+    <integration:service-activator input-channel="inboundReplicationUpdates" ref="inboundReplicationUpdateProcessor" />
 
 </beans>

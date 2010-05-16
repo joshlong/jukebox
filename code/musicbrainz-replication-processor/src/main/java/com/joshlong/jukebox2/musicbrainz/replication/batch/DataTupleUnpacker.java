@@ -1,4 +1,4 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication.batch;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.InitializingBean;

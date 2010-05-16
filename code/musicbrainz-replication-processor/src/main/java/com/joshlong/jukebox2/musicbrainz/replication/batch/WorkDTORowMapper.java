@@ -1,4 +1,4 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication.batch;
 
 import org.springframework.jdbc.core.RowMapper;
 

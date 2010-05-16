@@ -1,4 +1,4 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication.batch;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -7,18 +7,28 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
  */
-public class PendingDataDTO {
+public class PendingDTO {
     private int seqId;
-    private boolean key;
-    private String data;
+    private int XID;
+    private String tableName;
+    private String op;
 
-    public PendingDataDTO() {
+    public PendingDTO() {
     }
 
-    public PendingDataDTO(final int seqId, final boolean key, final String data) {
+    public PendingDTO(int seqId, int XID, String tableName, String op) {
         this.seqId = seqId;
-        this.key = key;
-        this.data = data;
+        this.XID = XID;
+        this.tableName = tableName;
+        this.op = op;
+    }
+
+    public String getOp() {
+        return op;
+    }
+
+    public void setOp(final String op) {
+        this.op = op;
     }
 
     public int getSeqId() {
@@ -29,20 +39,20 @@ public class PendingDataDTO {
         this.seqId = seqId;
     }
 
-    public boolean isKey() {
-        return key;
+    public int getXID() {
+        return XID;
     }
 
-    public void setKey(final boolean key) {
-        this.key = key;
+    public void setXID(final int XID) {
+        this.XID = XID;
     }
 
-    public String getData() {
-        return data;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setData(final String data) {
-        this.data = data;
+    public void setTableName(final String tableName) {
+        this.tableName = tableName;
     }
 
     @Override

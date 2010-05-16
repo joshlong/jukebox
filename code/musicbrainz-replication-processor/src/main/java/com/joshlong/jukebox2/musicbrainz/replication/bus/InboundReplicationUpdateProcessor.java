@@ -1,6 +1,6 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.bus;
+package com.joshlong.jukebox2.musicbrainz.replication.bus;
 
-import com.joshlong.jukebox2.batch.musicbrainz.replication.batch.ReplicationProcessor;
+import com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationProcessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

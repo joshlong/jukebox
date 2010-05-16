@@ -1,4 +1,4 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication.batch;
 
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.transform.FieldSet;

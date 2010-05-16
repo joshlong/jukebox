@@ -1,4 +1,4 @@
-package com.joshlong.jukebox2.batch.musicbrainz.replication.bus;
+package com.joshlong.jukebox2.musicbrainz.replication.bus;
 
 import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
 

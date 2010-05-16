@@ -22,11 +22,11 @@
 
     <beans:import resource="batch-core.xml"/>
 
-    <beans:bean id="replicationUtils" class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.ReplicationUtils">
+    <beans:bean id="replicationUtils" class="com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationUtils">
         <beans:constructor-arg value="file://#{systemProperties['user.home']}/Desktop/replication"/>
     </beans:bean>
 
-    <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.ReplicationProcessor"
+    <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationProcessor"
                 p:jdbcTemplate-ref="musicbrainzJdbcTemplate"
                 p:replicationUtils-ref="replicationUtils"
                 p:loadPendingJob-ref="loadReplicationDataJob"
@@ -40,7 +40,7 @@
                 p:rollbackOnCommitFailure="true"/>
 
 
-    <beans:bean id="dataTupleUnpacker" class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.DataTupleUnpacker">
+    <beans:bean id="dataTupleUnpacker" class="com.joshlong.jukebox2.musicbrainz.replication.batch.DataTupleUnpacker">
         <beans:property name="unpackingRegex">
             <beans:value><![CDATA[
                 (\"([^\"]*)\")=(\'([^\']*)\'|\s+)    
@@ -70,10 +70,10 @@
     </job>
 
     <beans:bean id="workToBeDoneWriter" scope="step"
-                class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.PerformReplicationItemWriter">
+                class="com.joshlong.jukebox2.musicbrainz.replication.batch.PerformReplicationItemWriter">
         <beans:property name="dataTupleUnpacker" ref="dataTupleUnpacker"/>
         <beans:property name="workDTORowMapper">
-            <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.WorkDTORowMapper"/>
+            <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.WorkDTORowMapper"/>
         </beans:property>
         <beans:property name="jdbcTemplate" ref="musicbrainzJdbcTemplate"/>
         <beans:property name="selectOperationsForTransactionSql">
@@ -90,7 +90,7 @@
                 scope="step">
         <beans:property name="dataSource" ref="musicbrainzDataSource"/>
         <beans:property name="rowMapper">
-            <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.PendingWorkDTORowMapper"/>
+            <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.PendingWorkDTORowMapper"/>
         </beans:property>
         <beans:property name="sql">
             <beans:value>
@@ -130,7 +130,7 @@
                     </beans:bean>
                 </beans:property>
                 <beans:property name="fieldSetMapper">
-                    <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.PendingDataFieldSetMapper"/>
+                    <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.PendingDataFieldSetMapper"/>
                 </beans:property>
             </beans:bean>
         </beans:property>
@@ -160,7 +160,7 @@
                     </beans:bean>
                 </beans:property>
                 <beans:property name="fieldSetMapper">
-                    <beans:bean class="com.joshlong.jukebox2.batch.musicbrainz.replication.batch.PendingFieldSetMapper"/>
+                    <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.PendingFieldSetMapper"/>
                 </beans:property>
             </beans:bean>
         </beans:property>
