@@ -1,6 +1,9 @@
-package com.joshlong.jukebox2.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication;
+
+import org.springframework.core.io.Resource;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * @author <a href="mailto:josh@joshlong.com">Josh Long</a>
@@ -13,6 +16,10 @@ public class ReplicationUtils {
     private String replSequence = "REPLICATION_SEQUENCE";
     private String schemaSequence = "SCHEMA_SEQUENCE";
     private String timestamp = "TIMESTAMP";
+
+    public ReplicationUtils(Resource resource) throws IOException {
+        this(resource.getFile());
+    }
 
     public ReplicationUtils(File f) {
         this.replicatonDirectory = f;

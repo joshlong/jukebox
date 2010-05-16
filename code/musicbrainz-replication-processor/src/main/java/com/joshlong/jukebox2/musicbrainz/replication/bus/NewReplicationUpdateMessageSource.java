@@ -2,6 +2,7 @@ package com.joshlong.jukebox2.musicbrainz.replication.bus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.core.io.Resource;
 import org.springframework.integration.core.Message;
 import org.springframework.integration.message.MessageBuilder;
 import org.springframework.integration.message.MessageSource;
@@ -17,7 +18,12 @@ public class NewReplicationUpdateMessageSource implements MessageSource<File> {
     private String replicationUrlMask = "%s/replication-%s.tar.bz2";
     private String  replicationBaseUri;
     private String findNextReplicationSequenceSQL ;
+    private Resource downloadDirectory ;
 
+    @Required
+    public void setDownloadDirectory(final Resource downloadDirectory) {
+        this.downloadDirectory = downloadDirectory;
+    }
 
     @Autowired     private JdbcTemplate jdbcTemplate ;
 

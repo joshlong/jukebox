@@ -4,6 +4,7 @@ import com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationProcessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.Message;
 
 import java.io.File;
@@ -23,6 +24,7 @@ public class InboundReplicationUpdateProcessor {
         return null;
     }
 
+    @ServiceActivator
     public void handleNewReplicationUpdate(Message<File> msg)
         throws Throwable {
         this.replicationProcessor.processReplicationBundle(replicationBundleFromFile(msg.getPayload()));

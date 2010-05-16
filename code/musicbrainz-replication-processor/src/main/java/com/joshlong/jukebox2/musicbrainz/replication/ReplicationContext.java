@@ -1,5 +1,6 @@
-package com.joshlong.jukebox2.musicbrainz.replication.batch;
+package com.joshlong.jukebox2.musicbrainz.replication;
 
+import com.joshlong.jukebox2.musicbrainz.replication.ReplicationUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;

@@ -22,16 +22,6 @@
 
     <beans:import resource="batch-core.xml"/>
 
-    <beans:bean id="replicationUtils" class="com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationUtils">
-        <beans:constructor-arg value="file://#{systemProperties['user.home']}/Desktop/replication"/>
-    </beans:bean>
-
-    <beans:bean class="com.joshlong.jukebox2.musicbrainz.replication.batch.ReplicationProcessor"
-                p:jdbcTemplate-ref="musicbrainzJdbcTemplate"
-                p:replicationUtils-ref="replicationUtils"
-                p:loadPendingJob-ref="loadReplicationDataJob"
-                p:jobLauncher-ref="jobLauncher"
-            />
 
 
     <beans:bean id="dataSourceTransactionManager"

@@ -1,5 +1,7 @@
 package com.joshlong.jukebox2.musicbrainz.replication.batch;
 
+import com.joshlong.jukebox2.musicbrainz.replication.ReplicationContext;
+import com.joshlong.jukebox2.musicbrainz.replication.ReplicationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.Job;
