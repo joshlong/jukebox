@@ -19,7 +19,7 @@
         ">
 
 
-    <context:component-scan base-package="com.joshlong.jukebox2.bus"/>
+    <context:component-scan base-package="com.joshlong.jukebox2."/>
     
     <task:scheduler id="scheduler" pool-size="10"/>
     <task:executor id="executor" pool-size="10"/>
