@@ -19,6 +19,12 @@
         ">
 
 
+
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:/service-client-context.properties"/>
+    <context:property-placeholder ignore-unresolvable="true" location="classpath:/service-context.properties"/>
+    <context:property-placeholder ignore-unresolvable="true" location="bus.properties"/>
+
+    <import resource="musicbrainz-replication.xml"/>
     <!--
      todo you have a batch job that downloads updates
      , and u have the beginnings of a SI messagesource that should consult the db, do the download, and deliver an event
@@ -29,9 +35,9 @@
     <task:scheduler id="scheduler" pool-size="10"/>
     <task:executor id="executor" pool-size="10"/>
     <task:annotation-driven scheduler="scheduler"/>
-    <context:property-placeholder location="bus.properties"/>
 
-    <import resource="musicbrainz-replication.xml"/>
+
+
 
     <bean id="replicationDirectory" class="org.springframework.core.io.FileSystemResource">
         <constructor-arg value="file://#{systemProperties['user.home']}/Desktop/replication"/>
@@ -53,16 +59,25 @@
             />
 
 
-    <bean id="newReplicationUpdateMessageSource" class="com.joshlong.jukebox2.musicbrainz.replication.bus.NewReplicationUpdateMessageSource">
-        <property name="findNextReplicationSequenceSQL" value="SELECT current_replication_sequence FROM replication_control"/>
-        <property name="replicationBaseUri" value="${musicbrainz.http.url}"/>
-        <property name="downloadDirectory" ref="replicationDownloadDirectory"/>
-    </bean>
+    <bean id="newReplicationUpdateMessageSource"
+          class="com.joshlong.jukebox2.musicbrainz.replication.bus.NewReplicationUpdateMessageSource"
+            p:findNextReplicationSequenceSQL="SELECT current_replication_sequence FROM replication_control"
+            p:replicationBaseUri="${musicbrainz.http.url}"
+            p:jdbcTemplate-ref="musicbrainzJdbcTemplate"
+            p:downloadDirectory-ref="replicationDownloadDirectory"
+    />
 
-    <bean id="inboundReplicationUpdateProcessor" class="com.joshlong.jukebox2.musicbrainz.replication.bus.InboundReplicationUpdateProcessor"/>
+    <bean id="inboundReplicationUpdateProcessor"
+          class="com.joshlong.jukebox2.musicbrainz.replication.bus.InboundReplicationUpdateProcessor" />
 
     <integration:channel id="inboundReplicationUpdates"/>
-    <integration:inbound-channel-adapter ref="newReplicationUpdateMessageSource" channel="inboundReplicationUpdates"/>
+    
+    <integration:inbound-channel-adapter ref="newReplicationUpdateMessageSource" channel="inboundReplicationUpdates">
+        <integration:poller max-messages-per-poll="10" >
+            <integration:interval-trigger interval="10000"/>
+        </integration:poller>
+    </integration:inbound-channel-adapter>
+
     <integration:service-activator input-channel="inboundReplicationUpdates" ref="inboundReplicationUpdateProcessor"/>
 
 </beans>

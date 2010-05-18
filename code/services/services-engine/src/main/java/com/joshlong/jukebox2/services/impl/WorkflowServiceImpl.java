@@ -38,6 +38,14 @@ import java.util.*;
  * Integration point with our workflow engine -- should be able to query worklists, kick off new * process instances,
  * all from here *
  *
+ * TODO look into embedding Activiti
+ *
+ * TODO look into cleaning up the integrating with jBPMTemplate
+ *
+ *
+ * TODO look into fixing the JMS handling - how ca we use the CachingConnectionFactory and do the right thing?
+ *
+ *
  * @author Josh Long
  */
 public class WorkflowServiceImpl extends BaseService implements WorkflowService, InitializingBean {

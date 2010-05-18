@@ -9,7 +9,11 @@ import org.apache.xbean.spring.context.ClassPathXmlApplicationContext;
  */
 public class Main {
     public static void main (String [] args) throws Throwable {
-        ClassPathXmlApplicationContext classPathXmlApplicationContext = new ClassPathXmlApplicationContext( "bus.xml") ;
+
+        ClassPathXmlApplicationContext classPathXmlApplicationContext =
+                new ClassPathXmlApplicationContext( "bus.xml") ;
+
         classPathXmlApplicationContext.start();
+        
     }
 }
