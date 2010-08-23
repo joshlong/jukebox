@@ -4,6 +4,9 @@
     <facet type="Spring" name="Spring">
       <configuration />
     </facet>
+    <facet type="Python" name="Python">
+      <configuration sdkName="Python 2.6.4" />
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
@@ -19,6 +22,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Python 2.6.4 interpreter library" level="application" />
     <orderEntry type="library" exported="" name="Maven: antlr:antlr:2.7.7" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.antlr:antlr-runtime:3.2" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.antlr:stringtemplate:3.2" level="project" />

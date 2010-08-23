@@ -23,7 +23,6 @@
     <beans:import resource="batch-core.xml"/>
 
 
-
     <beans:bean id="dataSourceTransactionManager"
                 class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
                 p:dataSource-ref="musicbrainzDataSource" p:nestedTransactionAllowed="true"
@@ -58,6 +57,7 @@
             </tasklet>
         </step>
     </job>
+
 
     <beans:bean id="workToBeDoneWriter" scope="step"
                 class="com.joshlong.jukebox2.musicbrainz.replication.batch.PerformReplicationItemWriter">
